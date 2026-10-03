@@ -185,7 +185,7 @@ export default function HomeContent() {
                     data-backed resume.
                   </span>
                   <svg
-                    className="absolute -bottom-2 left-0 w-full"
+                    className="absolute -bottom-4 left-0 w-full"
                     viewBox="0 0 200 10"
                     preserveAspectRatio="none"
                   >
