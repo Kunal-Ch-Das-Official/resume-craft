@@ -3132,10 +3132,92 @@ body {
 .resume-canvas { width: 794px; min-height: 1123px; margin: 0 auto; background: #fff; box-shadow: 0 18px 45px rgba(18,33,26,.12); overflow: hidden; }
 .resume-canvas--compact { box-shadow: none; }
 
+/* ================= PRODUCTION MULTI-PAGE PRINT SYSTEM ================= */
 @media print {
-  .no-print { display: none !important; }
-  body { background: #fff; }
-  .resume-canvas { box-shadow: none; }
+  /* 1. Valid syntax without !important so Chrome parses @page correctly */
+  @page {
+    size: A4 portrait;
+    margin: 14mm 16mm 14mm 16mm;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 3. Hide interactive screen UI */
+  .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* 4. Flush print container */
+  #resume-print-area {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  /* 5. Strip template internal padding (p-8, p-10, p-12) so Page 1 starts right at the top */
+  #resume-print-area .resume-canvas,
+  #resume-print-area .resume-canvas--compact,
+  #resume-print-area [class*="max-w-"],
+  #resume-print-area .max-w-4xl,
+  #resume-print-area .max-w-3xl {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* 6. Prevent orphaned headers across page splits */
+  #resume-print-area h1,
+  #resume-print-area h2,
+  #resume-print-area h3,
+  #resume-print-area h4 {
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
+  }
+
+  /* 7. Prevent item cards from splitting mid-block */
+  #resume-print-area .space-y-4 > div,
+  #resume-print-area .grid > div,
+  #resume-print-area ul > li,
+  #resume-print-area ol > li,
+  #resume-print-area .mb-3,
+  #resume-print-area .mb-4 {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* 8. Strip hardcoded min-heights */
+  #resume-print-area [class*="min-h-"] {
+    min-height: 0 !important;
+  }
 }
 
 .selection\:bg-indigo-500 *::-moz-selection {

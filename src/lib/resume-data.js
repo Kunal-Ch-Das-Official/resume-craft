@@ -1,50 +1,447 @@
-export const TEMPLATE_DEFINITIONS = [
-  { id: 'clean-ats-optimizer', name: 'Clean ATS Optimizer', category: 'ATS / Corporate', description: 'Straightforward hierarchy designed for reliable parsing and recruiter scanning.', accent: 'emerald', bestFor: 'General applications' },
-  { id: 'executive-minimalist', name: 'Executive Minimalist', category: 'Executive', description: 'Confident typography and restrained spacing for senior professionals.', accent: 'slate', bestFor: 'Leadership roles' },
-  { id: 'tech-modernist', name: 'Tech Modernist', category: 'Technology', description: 'Modern developer-focused layout with strong technical sectioning.', accent: 'cyan', bestFor: 'Engineering & product' },
-  { id: 'academic-researcher', name: 'Academic Researcher', category: 'Academic', description: 'Publication-friendly structure with emphasis on research and education.', accent: 'indigo', bestFor: 'Research & academia' },
-  { id: 'creative-professional', name: 'Creative Professional', category: 'Creative', description: 'Expressive visual rhythm while keeping the content easy to navigate.', accent: 'amber', bestFor: 'Design & creative' },
-  { id: 'two-column-split', name: 'Two Column Split', category: 'Modern', description: 'Balanced two-column composition for dense but readable resumes.', accent: 'violet', bestFor: 'Multi-skilled profiles' },
-  { id: 'startup-innovator', name: 'Startup Innovator', category: 'Startup', description: 'Compact, energetic presentation built around impact and projects.', accent: 'rose', bestFor: 'Startups & builders' },
-  { id: 'consultant-strategist', name: 'Consultant Strategist', category: 'Business', description: 'Polished consulting-style structure with crisp section hierarchy.', accent: 'blue', bestFor: 'Consulting & business' },
-  { id: 'entry-level-graduate', name: 'Entry Level Graduate', category: 'Fresher', description: 'Education and projects take center stage for early-career candidates.', accent: 'teal', bestFor: 'Students & freshers' },
-  { id: 'international-europass', name: 'International Europass', category: 'International', description: 'Detailed conventional format suitable for international applications.', accent: 'sky', bestFor: 'Global applications' },
+// lib/resume-data.js
+
+export const COLOR_PALETTES = [
+  {
+    id: "light-blue",
+    name: "Light Blue",
+    hex: "#38bdf8",
+    accent: "#0284c7",
+    soft: "#f0f9ff",
+    border: "#bae6fd",
+  },
+  {
+    id: "light-green",
+    name: "Light Green",
+    hex: "#4ade80",
+    accent: "#16a34a",
+    soft: "#f0fdf4",
+    border: "#bbf7d0",
+  },
+  {
+    id: "red",
+    name: "Crimson Red",
+    hex: "#f87171",
+    accent: "#dc2626",
+    soft: "#fef2f2",
+    border: "#fecaca",
+  },
+  {
+    id: "yellow",
+    name: "Warm Amber",
+    hex: "#fbbf24",
+    accent: "#d97706",
+    soft: "#fffbeb",
+    border: "#fde68a",
+  },
+  {
+    id: "pink",
+    name: "Soft Rose",
+    hex: "#f472b6",
+    accent: "#db2777",
+    soft: "#fdf2f8",
+    border: "#fbcfe8",
+  },
+  {
+    id: "orange",
+    name: "Tangerine",
+    hex: "#fb923c",
+    accent: "#ea580c",
+    soft: "#fff7ed",
+    border: "#fed7aa",
+  },
 ];
 
-export const EMPTY_RESUME = {
-  basicInfo: { fullName: '', position: '' },
-  address: { streetName: '', city: '', district: '', pincode: '', country: 'India' },
-  contactInfo: { primaryEmail: '', secondaryEmail: '', primaryMobile: '', secondaryMobile: '', linkedin: '', github: '', portfolio: '' },
-  profileSummary: { priority: 1, subject: '', objective: '' },
-  educations: { priority: 4, sectionTitle: 'Education', qualifications: {} },
-  workExperience: { priority: 3, sectionTitle: 'Experience', companies: {} },
-  skills: { priority: 6, sectionTitle: 'Skills', skills: {} },
-  languageProficiency: { priority: 10, sectionTitle: 'Languages', languageKnows: [] },
-  projects: { priority: 3, sectionTitle: 'Projects', projects: {} },
-  certifications: { priority: 5, sectionTitle: 'Certifications', certificates: {} },
-  openSource: { priority: 7, sectionTitle: 'Open Source', contributions: {} },
-  publications: { priority: 8, sectionTitle: 'Publications', publications: {} },
-  awardsAndAchievements: { priority: 9, sectionTitle: 'Awards & Achievements', achievements: [] },
-  templateName: 'clean-ats-optimizer',
-};
+export const TEMPLATE_DEFINITIONS = [
+  // --- 5 Templates WITH Avatar (ATS Compatible) ---
+  {
+    id: "tech-modernist",
+    name: "Tech Modernist",
+    category: "Technical",
+    hasAvatar: true,
+    bestFor: "Full-Stack & DevOps Engineers",
+    description:
+      "Modern split header featuring a profile avatar, GitHub and portfolio badges.",
+  },
+  {
+    id: "creative-professional",
+    name: "Creative Professional",
+    category: "Design & Media",
+    hasAvatar: true,
+    bestFor: "UI/UX Designers & Creators",
+    description:
+      "Bold layout with hero avatar display and dedicated project showcases.",
+  },
+  {
+    id: "two-column-split",
+    name: "Two Column Split",
+    category: "Contemporary",
+    hasAvatar: true,
+    bestFor: "Product Managers & Consultants",
+    description:
+      "Distinct sidebar featuring circular photo, proficiency bars, and contacts.",
+  },
+  {
+    id: "international-europass",
+    name: "International Europass",
+    category: "International",
+    hasAvatar: true,
+    bestFor: "European & Global Applications",
+    description:
+      "Standardised international layout with formal avatar placement.",
+  },
+  {
+    id: "startup-innovator",
+    name: "Startup Innovator",
+    category: "Creative",
+    hasAvatar: true,
+    bestFor: "Founders & Early-Stage Hires",
+    description:
+      "High-contrast dynamic layout with photo integration and key builds highlight.",
+  },
+
+  // --- 5 Templates WITHOUT Avatar (100% Strict ATS Optimized) ---
+  {
+    id: "clean-ats-optimizer",
+    name: "Clean ATS Optimizer",
+    category: "ATS Classics",
+    hasAvatar: false,
+    bestFor: "Corporate & Enterprise ATS",
+    description:
+      "Linear, ultra-scannable ATS standard layout optimized for parser algorithms.",
+  },
+  {
+    id: "executive-minimalist",
+    name: "Executive Minimalist",
+    category: "Leadership",
+    hasAvatar: false,
+    bestFor: "C-Level, VPs & Senior Directors",
+    description:
+      "Classic typography with high information density, clean rules, and no avatar.",
+  },
+  {
+    id: "academic-researcher",
+    name: "Academic Researcher",
+    category: "Academic",
+    hasAvatar: false,
+    bestFor: "Postdocs, Faculty & Scientists",
+    description:
+      "Text-first layout prioritizing publications, citations, and credentials.",
+  },
+  {
+    id: "consultant-strategist",
+    name: "Consultant Strategist",
+    category: "Consulting",
+    hasAvatar: false,
+    bestFor: "Management Consultants & Analysts",
+    description:
+      "Impact-oriented layout with structured executive briefing cards.",
+  },
+  {
+    id: "entry-level-graduate",
+    name: "Entry Level Graduate",
+    category: "Entry Level",
+    hasAvatar: false,
+    bestFor: "Freshers & University Grads",
+    description:
+      "Education-forward resume prioritizing degrees, certifications, and skills.",
+  },
+];
 
 export const DEMO_RESUME = {
-  ...EMPTY_RESUME,
-  basicInfo: { fullName: 'Aarav Mehta', position: 'Backend Engineer' },
-  address: { streetName: '42 River Lane', city: 'Pune', district: 'Pune', pincode: '411001', country: 'India' },
-  contactInfo: { primaryEmail: 'aarav.mehta@example.com', primaryMobile: '+91 98765 43210', linkedin: 'linkedin.com/in/aarav-mehta', github: 'github.com/aarav-mehta', portfolio: 'aaravmehta.dev' },
-  profileSummary: { priority: 1, subject: 'Backend Engineer', objective: 'Backend engineer focused on reliable APIs, distributed systems, and pragmatic developer experiences. I enjoy turning complex workflows into maintainable products with measurable impact.' },
-  educations: { priority: 4, sectionTitle: 'Education', qualifications: { btech: { priority: 1, institutionName: 'Northstar Institute of Technology', startedAt: '2018-08-01', yearOfComplete: '2022-06-01', pursuing: false, percentage: '8.7 CGPA', description: 'Computer Science & Engineering' } } },
-  workExperience: { priority: 3, sectionTitle: 'Experience', companies: { northstar: { priority: 1, jobTitle: 'Backend Engineer', jobConditions: 'REMOTE', jobTypes: 'FULL_TIME', jobLocation: 'Pune, India', responsibility: ['Designed and shipped resilient REST APIs used by multiple product teams.', 'Improved background processing reliability with queues, caching, and observability.', 'Collaborated with frontend and product teams to deliver customer-facing workflows.'], startDate: '2023-04-01', isPresentJob: true } } },
-  skills: { priority: 6, sectionTitle: 'Skills', skills: { Backend: ['TypeScript', 'Node.js', 'Express.js', 'REST APIs'], Data: ['PostgreSQL', 'MongoDB', 'Redis'], Platform: ['Docker', 'AWS', 'CI/CD'] } },
-  languageProficiency: { priority: 10, sectionTitle: 'Languages', languageKnows: [{ languageName: 'English', proficiencyOutOfTen: 9 }, { languageName: 'Hindi', proficiencyOutOfTen: 8 }] },
-  projects: { priority: 3, sectionTitle: 'Projects', projects: { 'resume-platform': { priority: 1, description: 'A production-oriented resume platform with reusable templates and structured profile data.', projectUrl: 'github.com/example/resume-platform', startDate: '2025-01-15', isWorking: true, techStack: ['Next.js', 'Node.js', 'MongoDB'], skills: ['Product design', 'API architecture'] } } },
-  certifications: { priority: 5, sectionTitle: 'Certifications', certificates: { aws: { priority: 1, overview: 'AWS Certified Developer', skillLearned: ['AWS', 'Lambda', 'Cloud architecture'], duration: '2024' } } },
-  openSource: { priority: 7, sectionTitle: 'Open Source', contributions: { subatom: { priority: 1, githubUrl: 'github.com/example/project', description: 'Contributed reusable framework tooling and developer documentation.', duration: '2025 – Present' } } },
-  awardsAndAchievements: { priority: 9, sectionTitle: 'Awards & Achievements', achievements: [{ priority: 1, title: 'Hackathon Winner', description: 'Won first place at a national product hackathon.' }] },
-  templateName: 'clean-ats-optimizer',
+  _id: "demo-resume-id",
+  basicInfo: {
+    fullName: "Aarav Mehta",
+    position: "Senior Backend Engineer",
+  },
+  avatar: {
+    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80",
+    key: "avatar-demo",
+  },
+  address: {
+    streetName: "42 River Lane",
+    city: "Pune",
+    district: "Pune",
+    pincode: "411001",
+    country: "India",
+  },
+  contactInfo: {
+    primaryEmail: "aarav.mehta@example.com",
+    primaryMobile: "+919876543210",
+    linkedin: "https://linkedin.com/in/aarav-mehta",
+    github: "https://github.com/aarav-mehta",
+    portfolio: "https://aaravmehta.dev",
+  },
+  profileSummary: {
+    priority: 1,
+    subject: "Backend Engineer",
+    objective:
+      "Results-driven Backend Engineer with 5+ years specializing in distributed systems, event-driven architecture, and high-performance microservices. Proven record in reducing API latencies by 35% and operating multi-region Redis/Kafka clusters.",
+  },
+  workExperience: {
+    priority: 2,
+    sectionTitle: "Work Experience",
+    companies: {
+      "comp-1": {
+        priority: 1,
+        jobTitle: "Senior Backend Engineer",
+        companyName: "Northstar Technologies",
+        jobConditions: "REMOTE",
+        jobTypes: "FULL_TIME",
+        jobLocation: "Pune, India",
+        startDate: "2023-01",
+        endDate: "",
+        isPresentJob: true,
+        responsibility: [
+          "Architected real-time ingestion pipelines processing over 45M messages daily using Kafka and Go.",
+          "Refactored legacy database queries, trimming P99 response times from 340ms to 48ms.",
+          "Mentored an engineering squad of 6 junior devs on distributed caching and clean architecture.",
+        ],
+      },
+      "comp-2": {
+        priority: 2,
+        jobTitle: "Software Development Engineer II",
+        companyName: "Vertex Cloud Systems",
+        jobConditions: "HYBRID",
+        jobTypes: "FULL_TIME",
+        jobLocation: "Bengaluru, India",
+        startDate: "2021-06",
+        endDate: "2022-12",
+        isPresentJob: false,
+        responsibility: [
+          "Engineered multi-tenant IAM microservice supporting OAuth2 and SAML Single Sign-On.",
+          "Implemented comprehensive CI/CD pipelines cut automated test deployment times by 40%.",
+        ],
+      },
+    },
+  },
+  projects: {
+    priority: 3,
+    sectionTitle: "Projects",
+    projects: {
+      "proj-1": {
+        priority: 1,
+        name: "Distributed Stream Tracer",
+        description:
+          "Open-source observability engine mapping cross-service HTTP and gRPC spans across microservices with Zero-allocation instrumentation.",
+        projectUrl: "https://github.com/aarav-mehta/stream-tracer",
+        startDate: "2024-03",
+        endDate: "2024-11",
+        isWorking: false,
+        techStack: [
+          "TypeScript",
+          "Node.js",
+          "Redis",
+          "Docker",
+          "OpenTelemetry",
+        ],
+        skills: [
+          "Distributed Tracing",
+          "Microservices",
+          "Performance Profiling",
+        ],
+      },
+      "proj-2": {
+        priority: 2,
+        name: "Cloudinary Resume Sync API",
+        description:
+          "Multipart file processor integrating signed Cloudinary upload tokens and automatic WebP image compression pipelines.",
+        projectUrl: "https://github.com/aarav-mehta/resume-api",
+        startDate: "2025-01",
+        endDate: "",
+        isWorking: true,
+        techStack: ["Node.js", "MongoDB", "Express", "Cloudinary SDK"],
+        skills: ["RESTful API", "Multipart File Handling", "Cloud Storage"],
+      },
+    },
+  },
+  educations: {
+    priority: 4,
+    sectionTitle: "Education",
+    qualifications: {
+      "edu-1": {
+        priority: 1,
+        institutionName: "Pune Institute of Computer Technology",
+        startedAt: "2017-08",
+        yearOfComplete: "2021-06",
+        pursuing: false,
+        percentage: "8.8 CGPA",
+        description: "B.Tech in Computer Science and Engineering",
+      },
+      "edu-2": {
+        priority: 2,
+        institutionName: "Delhi Public School",
+        startedAt: "2015-04",
+        yearOfComplete: "2017-03",
+        pursuing: false,
+        percentage: "94.2%",
+        description: "Higher Secondary Certificate (HSC) - Science",
+      },
+    },
+  },
+  certifications: {
+    priority: 5,
+    sectionTitle: "Certifications",
+    certificates: {
+      "cert-1": {
+        priority: 1,
+        overview: "AWS Certified Solutions Architect – Associate",
+        skillLearned: ["AWS", "VPC", "ECS", "DynamoDB", "S3"],
+        duration: "3 months",
+        certificateContent: {
+          title: "AWS_Solutions_Architect.pdf",
+          url: "https://example.com/certs/aws.pdf",
+          key: "cert-aws",
+        },
+      },
+      "cert-2": {
+        priority: 2,
+        overview: "Certified Kubernetes Administrator (CKA)",
+        skillLearned: ["Kubernetes", "Helm", "Cluster Ingress", "RBAC"],
+        duration: "2 months",
+        certificateContent: {
+          title: "CKA_Certificate.pdf",
+          url: "https://example.com/certs/cka.pdf",
+          key: "cert-cka",
+        },
+      },
+    },
+  },
+  skills: {
+    priority: 6,
+    sectionTitle: "Skills",
+    skills: {
+      "Languages & Core": [
+        "TypeScript",
+        "JavaScript",
+        "Go",
+        "SQL",
+        "HTML5/CSS3",
+      ],
+      "Backend & Databases": [
+        "Node.js",
+        "Express",
+        "MongoDB",
+        "PostgreSQL",
+        "Redis",
+      ],
+      "DevOps & Cloud": [
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "Git",
+        "Nginx",
+        "CI/CD",
+      ],
+    },
+  },
+  publications: {
+    priority: 7,
+    sectionTitle: "Publications",
+    publications: {
+      "pub-1": {
+        priority: 1,
+        description:
+          "Distributed Tracing Patterns in Modern Cloud-Native Architectures (IEEE Transactions 2025)",
+        referenceUrl: "https://doi.org/10.1109/sample.2025",
+        publicationReference: [
+          {
+            title: "IEEE_Paper_Manuscript.pdf",
+            accessUrl: {
+              url: "https://example.com/paper.pdf",
+              key: "pub-paper",
+            },
+          },
+        ],
+      },
+      "pub-2": {
+        priority: 2,
+        description:
+          "Zero-Cost Cache Invalidation via Redis Streams (ACM Distributed Systems Review 2024)",
+        referenceUrl: "https://doi.org/10.1145/sample.2024",
+        publicationReference: [
+          {
+            title: "ACM_Review_Preprint.pdf",
+            accessUrl: {
+              url: "https://example.com/preprint.pdf",
+              key: "pub-preprint",
+            },
+          },
+        ],
+      },
+    },
+  },
+  awardsAndAchievements: {
+    priority: 8,
+    sectionTitle: "Awards & Achievements",
+    achievements: [
+      {
+        priority: 1,
+        title: "National Smart India Hackathon Winner",
+        description:
+          "1st prize out of 500+ competing engineering institutes across India.",
+        documents: [],
+      },
+      {
+        priority: 2,
+        title: "Northstar High Performer of the Year",
+        description: "Awarded top engineering excellence contributor in 2024.",
+        documents: [],
+      },
+    ],
+  },
+  languageProficiency: {
+    priority: 10,
+    sectionTitle: "Languages",
+    languageKnows: [
+      { languageName: "English", proficiencyOutOfTen: 9 },
+      { languageName: "Hindi", proficiencyOutOfTen: 10 },
+      { languageName: "Marathi", proficiencyOutOfTen: 8 },
+    ],
+  },
+  templateName: "clean-ats-optimizer",
+  themeColor: "light-blue",
 };
 
-export function cloneResume(data = EMPTY_RESUME) {
+export const EMPTY_RESUME = {
+  basicInfo: { fullName: "", position: "" },
+  avatar: { url: "", key: "" },
+  address: { streetName: "", city: "", district: "", pincode: "", country: "" },
+  contactInfo: {
+    primaryEmail: "",
+    primaryMobile: "",
+    linkedin: "",
+    github: "",
+    portfolio: "",
+  },
+  profileSummary: { priority: 1, subject: "", objective: "" },
+  workExperience: {
+    priority: 2,
+    sectionTitle: "Work Experience",
+    companies: {},
+  },
+  projects: { priority: 3, sectionTitle: "Projects", projects: {} },
+  educations: { priority: 4, sectionTitle: "Education", qualifications: {} },
+  certifications: {
+    priority: 5,
+    sectionTitle: "Certifications",
+    certificates: {},
+  },
+  skills: { priority: 6, sectionTitle: "Skills", skills: {} },
+  publications: { priority: 7, sectionTitle: "Publications", publications: {} },
+  awardsAndAchievements: {
+    priority: 8,
+    sectionTitle: "Awards & Achievements",
+    achievements: [],
+  },
+  languageProficiency: {
+    priority: 10,
+    sectionTitle: "Languages",
+    languageKnows: [],
+  },
+  templateName: "clean-ats-optimizer",
+  themeColor: "light-blue",
+};
+
+export function cloneResume(data) {
   return JSON.parse(JSON.stringify(data));
 }

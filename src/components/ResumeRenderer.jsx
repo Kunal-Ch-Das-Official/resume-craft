@@ -1,3 +1,4 @@
+// components/ResumeRenderer.jsx
 import React from 'react';
 import ExecutiveMinimalist from './templates/ExecutiveMinimalist';
 import TechModernist from './templates/TechModernist';
@@ -24,11 +25,20 @@ export const TEMPLATE_REGISTRY = {
 };
 
 export default function ResumeRenderer({ resumeData, compact = false }) {
-  if (!resumeData) return <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-500">Loading resume…</div>;
-  const SelectedTemplate = TEMPLATE_REGISTRY[resumeData.templateName] || CleanAtsOptimizer;
+  if (!resumeData) {
+    return (
+      <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-500">
+        Loading resume…
+      </div>
+    );
+  }
+
+  const SelectedTemplate =
+    TEMPLATE_REGISTRY[resumeData.templateName] || CleanAtsOptimizer;
+
   return (
     <div className={`resume-canvas ${compact ? 'resume-canvas--compact' : ''}`}>
-      <SelectedTemplate data={resumeData} />
+      <SelectedTemplate data={resumeData} compact={compact} />
     </div>
   );
 }
