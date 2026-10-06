@@ -8,12 +8,12 @@ export const inputClass =
 export const labelClass =
   "mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500";
 
-export function Field({ label, icon: Icon, value, onChange, placeholder = "", type = "text" }) {
+export function Field({ label, icon: Icon, value, onChange, placeholder = "", type = "text", isRequired=false }) {
   return (
     <label className="block">
       <span className={labelClass}>
         {Icon ? <Icon size={13} /> : null}
-        {label}
+        {label} {isRequired === true ? <span className="is_required font-bold text-base">*</span> : ""}
       </span>
       <input
         className={inputClass}
@@ -21,16 +21,17 @@ export function Field({ label, icon: Icon, value, onChange, placeholder = "", ty
         value={value ?? ""}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
+        required={isRequired}
       />
     </label>
   );
 }
 
-export function AreaField({ label, value, onChange, placeholder = "", rows = 3 }) {
+export function AreaField({ label, value, onChange, placeholder = "", rows = 4, isRequired=false }) {
   return (
     <label className="block">
       <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-        {label}
+        {label} {isRequired === true ? <span className="is_required font-bold text-base">*</span> : ""}
       </span>
       <textarea
         className={`${inputClass} resize-none`}

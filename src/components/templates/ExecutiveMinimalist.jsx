@@ -1,6 +1,7 @@
 // components/templates/ExecutiveMinimalist.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
 export default function ExecutiveMinimalist({ data, compact = false }) {
   const { basicInfo, address, contactInfo, profileSummary, workExperience, educations, skills } = data;
@@ -12,7 +13,7 @@ export default function ExecutiveMinimalist({ data, compact = false }) {
   const LinkTag = compact ? "span" : "a";
 
   return (
-    <div className="max-w-4xl mx-auto p-10 bg-white text-gray-900 font-serif leading-normal">
+    <div className="max-w-4xl mx-auto p-10 bg-white text-gray-900 font-serif leading-normal flex flex-col">
       <div
         className="text-center border-b-2 pb-4 mb-6"
         style={{ borderBottomColor: theme.accent }}
@@ -42,7 +43,7 @@ export default function ExecutiveMinimalist({ data, compact = false }) {
       </div>
 
       {profileSummary?.objective && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "profileSummary", 1) }}>
           <h2 className="text-sm font-bold uppercase tracking-widest border-b border-gray-400 pb-1 mb-2 font-sans">
             Executive Profile
           </h2>
@@ -51,7 +52,7 @@ export default function ExecutiveMinimalist({ data, compact = false }) {
       )}
 
       {companies.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2 className="text-sm font-bold uppercase tracking-widest border-b border-gray-400 pb-1 mb-3 font-sans">
             Professional Experience
           </h2>
@@ -72,7 +73,7 @@ export default function ExecutiveMinimalist({ data, compact = false }) {
       )}
 
       {qualifications.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "educations", 4) }}>
           <h2 className="text-sm font-bold uppercase tracking-widest border-b border-gray-400 pb-1 mb-3 font-sans">
             Education
           </h2>
@@ -88,7 +89,7 @@ export default function ExecutiveMinimalist({ data, compact = false }) {
       )}
 
       {Object.keys(skillMap).length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "skills", 6) }}>
           <h2 className="text-sm font-bold uppercase tracking-widest border-b border-gray-400 pb-1 mb-2 font-sans">
             Core Competencies
           </h2>
@@ -102,6 +103,14 @@ export default function ExecutiveMinimalist({ data, compact = false }) {
           </div>
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["profileSummary", "workExperience", "educations", "skills"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

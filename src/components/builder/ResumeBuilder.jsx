@@ -4,6 +4,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   IconBriefcase,
+  IconTrophy,
+  IconCertificate,
+  IconBook,
   IconCode,
   IconDeviceFloppy,
   IconEye,
@@ -16,9 +19,9 @@ import {
   IconRefresh,
   IconSchool,
   IconSparkles,
-  IconTrash,
   IconUserCircle,
   IconWand,
+  IconGripVertical,
 } from "@tabler/icons-react";
 
 import ResumeRenderer from "@/components/ResumeRenderer";
@@ -28,11 +31,19 @@ import {
   TEMPLATE_DEFINITIONS,
   cloneResume,
 } from "@/lib/resume-data";
+import { stripTransientUploadReferences } from "@/components/utils/resumeHelpers.js";
 
 import { useResizablePane } from "@/hooks/useResizablePane";
 import BasicsTab from "./tabs/BasicsTab";
+import ExperienceTab from "./tabs/ExperienceTab";
+import EducationTab from "./tabs/EducationTab";
+import SkillsTab from "./tabs/SkillsTab";
+import ProjectsTab from "./tabs/ProjectsTab";
 import MoreTab from "./tabs/MoreTab";
-import { Field, AreaField, Section } from "./controls/FormControls";
+import AdditionalTab from "./tabs/AdditionalTab";
+import CertificatesTab from "./tabs/CertificatesTab";
+import PublicationsTab from "./tabs/PublicationsTab";
+import AchievementsTab from "./tabs/AchievementsTab";
 
 const tabs = [
   ["Basics", IconUserCircle],
@@ -40,42 +51,59 @@ const tabs = [
   ["Education", IconSchool],
   ["Skills", IconCode],
   ["Projects", IconFolderCode],
+  ["Certificates", IconCertificate],
+  ["Publications", IconBook],
+  ["Achievements", IconTrophy],
+  ["Additional", IconLayoutGrid],
   ["More", IconLayoutGrid],
 ];
+
+// These tabs map directly to top-level resume sections that expose a
+// `priority` field. Their order in the editor is derived from those priorities.
+const PRIORITY_TAB_CONFIG = {
+  Experience: { root: "workExperience" },
+  Education: { root: "educations" },
+  Skills: { root: "skills" },
+  Projects: { root: "projects" },
+  Certificates: { root: "certifications" },
+  Publications: { root: "publications" },
+  Achievements: { root: "awardsAndAchievements" },
+};
+
+const PRIORITY_TAB_NAMES = Object.keys(PRIORITY_TAB_CONFIG);
+const ACTIVE_TAB_STORAGE_KEY = "resumecraft-active-tab";
 
 export default function ResumeBuilder({
   initialTemplate = "clean-ats-optimizer",
 }) {
-  // 1. Resolve safe initial template
   const validInitial = useMemo(() => {
     return TEMPLATE_DEFINITIONS.some((item) => item.id === initialTemplate)
       ? initialTemplate
       : "clean-ats-optimizer";
   }, [initialTemplate]);
 
-  // 2. React Hooks & State Declarations (Must precede any setters)
   const [resume, setResume] = useState(() => ({
     ...cloneResume(DEMO_RESUME),
     templateName: validInitial,
   }));
 
   const [activeTab, setActiveTab] = useState("Basics");
+  const [activeTabHydrated, setActiveTabHydrated] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [mobileMode, setMobileMode] = useState("edit"); // "edit" | "preview"
+  const [mobileMode, setMobileMode] = useState("edit");
   const [zoom, setZoom] = useState(60);
   const [hydrated, setHydrated] = useState(false);
+  // Files are kept outside resume JSON so localStorage remains serializable.
+  const [pendingFiles, setPendingFiles] = useState({});
 
-  // 3. Horizontal resizer hook
   const { formWidth, isDragging, editorRef, startDragging, DIVIDER_HIT_WIDTH } =
     useResizablePane(650);
 
-  // 4. Hydrate once from localStorage on initial mount
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("resumecraft-draft");
       if (raw) {
         const parsed = JSON.parse(raw);
-        // Prioritize explicit URL template parameter over cached draft
         const chosenTemplate =
           initialTemplate &&
           TEMPLATE_DEFINITIONS.some((t) => t.id === initialTemplate)
@@ -83,18 +111,43 @@ export default function ResumeBuilder({
             : parsed.templateName || validInitial;
 
         setResume({
-          ...parsed,
+          ...stripTransientUploadReferences(parsed),
           templateName: chosenTemplate,
         });
+        setPendingFiles({});
       }
     } catch {
-      // Ignore corrupted draft storage
+      // Ignore
     } finally {
       setHydrated(true);
     }
   }, [initialTemplate, validInitial]);
 
-  // 5. Reactively sync when initialTemplate changes via client router
+  useEffect(() => {
+    try {
+      const storedTab = window.sessionStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
+      const validTab = tabs.some(([name]) => name === storedTab);
+
+      if (validTab) {
+        setActiveTab(storedTab);
+      }
+    } catch {
+      // Ignore unavailable sessionStorage (for example, restricted browser contexts).
+    } finally {
+      setActiveTabHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!activeTabHydrated) return;
+
+    try {
+      window.sessionStorage.setItem(ACTIVE_TAB_STORAGE_KEY, activeTab);
+    } catch {
+      // Ignore unavailable sessionStorage.
+    }
+  }, [activeTab, activeTabHydrated]);
+
   useEffect(() => {
     setResume((current) => {
       if (current.templateName !== validInitial) {
@@ -104,7 +157,6 @@ export default function ResumeBuilder({
     });
   }, [validInitial]);
 
-  // Deep immutable updates ensuring React re-renders live on every keystroke
   const update = (path, value) => {
     setResume((current) => {
       const next = cloneResume(current);
@@ -120,41 +172,136 @@ export default function ResumeBuilder({
     });
   };
 
-  const setMapItem = (root, collectionKey, id, field, value) => {
+  const getSectionPriority = (name, fallbackIndex) => {
+    const root = PRIORITY_TAB_CONFIG[name]?.root;
+    const priority = root ? Number(resume[root]?.priority) : NaN;
+    return Number.isFinite(priority) && priority > 0 ? priority : fallbackIndex + 1;
+  };
+
+  const orderedPriorityTabs = useMemo(() => {
+    return PRIORITY_TAB_NAMES
+      .map((name, index) => ({ name, priority: getSectionPriority(name, index), index }))
+      .sort((a, b) => a.priority - b.priority || a.index - b.index)
+      .map(({ name }) => tabs.find(([tabName]) => tabName === name));
+  }, [resume]);
+
+  const handleSectionTabDragStart = (event, name) => {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", name);
+  };
+
+  const handleSectionTabDrop = (event, targetName) => {
+    event.preventDefault();
+
+    const sourceName = event.dataTransfer.getData("text/plain");
+    if (
+      !sourceName ||
+      sourceName === targetName ||
+      !PRIORITY_TAB_CONFIG[sourceName] ||
+      !PRIORITY_TAB_CONFIG[targetName]
+    ) {
+      return;
+    }
+
+    const currentOrder = orderedPriorityTabs.map(([name]) => name);
+    const sourceIndex = currentOrder.indexOf(sourceName);
+    const targetIndex = currentOrder.indexOf(targetName);
+
+    if (sourceIndex < 0 || targetIndex < 0) return;
+
+    const nextOrder = [...currentOrder];
+    const [moved] = nextOrder.splice(sourceIndex, 1);
+    nextOrder.splice(targetIndex, 0, moved);
+
     setResume((current) => {
       const next = cloneResume(current);
-      if (!next[root]) next[root] = {};
-      if (!next[root][collectionKey]) next[root][collectionKey] = {};
-      if (!next[root][collectionKey][id]) next[root][collectionKey][id] = {};
-      next[root][collectionKey][id][field] = value;
+
+      nextOrder.forEach((name, index) => {
+        const root = PRIORITY_TAB_CONFIG[name].root;
+        next[root] = {
+          ...(next[root] || {}),
+          priority: index + 1,
+        };
+      });
+
       return next;
     });
   };
 
+  const handleSectionTabDragOver = (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  };
+
+  const renderTabs = () => {
+    const orderedTabs = [
+      tabs.find(([name]) => name === "Basics"),
+      ...orderedPriorityTabs,
+      tabs.find(([name]) => name === "Additional"),
+      tabs.find(([name]) => name === "More"),
+    ].filter(Boolean);
+
+    return orderedTabs.map(([name, Icon]) => {
+      const isReorderable = Boolean(PRIORITY_TAB_CONFIG[name]);
+      const priority = isReorderable
+        ? getSectionPriority(name, PRIORITY_TAB_NAMES.indexOf(name))
+        : null;
+
+      return (
+        <button
+          key={name}
+          type="button"
+          draggable={isReorderable}
+          onDragStart={
+            isReorderable
+              ? (event) => handleSectionTabDragStart(event, name)
+              : undefined
+          }
+          onDrop={
+            isReorderable
+              ? (event) => handleSectionTabDrop(event, name)
+              : undefined
+          }
+          onDragOver={isReorderable ? handleSectionTabDragOver : undefined}
+          className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+            activeTab === name
+              ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100"
+              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+          } ${isReorderable ? "cursor-grab active:cursor-grabbing" : ""}`}
+          onClick={() => setActiveTab(name)}
+          title={
+            isReorderable
+              ? `Priority ${priority} · Drag to reorder this resume section`
+              : undefined
+          }
+        >
+          {isReorderable && <IconGripVertical size={13} className="shrink-0 opacity-50" />}
+          <Icon size={14} />
+          {name}
+        </button>
+      );
+    });
+  };
+
   const saveDraft = () => {
-    window.localStorage.setItem("resumecraft-draft", JSON.stringify(resume));
+    const draft = stripTransientUploadReferences(resume);
+    window.localStorage.setItem("resumecraft-draft", JSON.stringify(draft));
     setSaved(true);
     window.setTimeout(() => setSaved(false), 2000);
   };
 
   const reset = () => {
     setResume({ ...cloneResume(EMPTY_RESUME), templateName: validInitial });
+    setPendingFiles({});
     window.localStorage.removeItem("resumecraft-draft");
   };
 
-  const loadDemo = () =>
+  const loadDemo = () => {
     setResume({ ...cloneResume(DEMO_RESUME), templateName: validInitial });
+    setPendingFiles({});
+  };
 
   const print = () => window.print();
-
-  const experienceEntries = Object.entries(
-    resume.workExperience?.companies || {},
-  );
-  const educationEntries = Object.entries(
-    resume.educations?.qualifications || {},
-  );
-  const projectEntries = Object.entries(resume.projects?.projects || {});
-  const skillGroups = Object.entries(resume.skills?.skills || {});
 
   const currentTemplate = useMemo(
     () =>
@@ -165,10 +312,8 @@ export default function ResumeBuilder({
 
   return (
     <>
-      {/* ================= SCREEN-ONLY EDITOR LAYOUT ================= */}
       <div className="no-print min-h-screen bg-slate-100/60 pb-12 lg:pb-0">
-        {/* Top Header Bar */}
-        <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+        <div className="sticky top-0 z-35 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5 sm:px-6">
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-600 sm:text-[11px]">
@@ -243,55 +388,57 @@ export default function ResumeBuilder({
           {mobileMode === "edit" ? (
             <div className="bg-white p-3">
               <div className="sticky top-[53px] z-20 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white py-2 scroll-slim">
-                {tabs.map(([name, Icon]) => (
-                  <button
-                    key={name}
-                    type="button"
-                    className={`flex items-center gap-1 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                      activeTab === name
-                        ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200"
-                        : "text-slate-500 hover:bg-slate-50"
-                    }`}
-                    onClick={() => setActiveTab(name)}
-                  >
-                    <Icon size={14} />
-                    {name}
-                  </button>
-                ))}
+                {renderTabs()}
               </div>
 
               <div className="mt-3">
                 {activeTab === "Basics" && (
-                  <BasicsTab resume={resume} update={update} />
+                  <BasicsTab resume={resume} update={update} setPendingFiles={setPendingFiles} />
                 )}
                 {activeTab === "Experience" && (
-                  <Section
-                    title="Work Experience"
-                    description="Your professional history"
-                  >
-                    {renderExperienceForm()}
-                  </Section>
+                  <ExperienceTab
+                    resume={resume}
+                    setResume={setResume}
+                    update={update}
+                  />
                 )}
                 {activeTab === "Education" && (
-                  <Section
-                    title="Education"
-                    description="Degrees and schooling"
-                  >
-                    {renderEducationForm()}
-                  </Section>
+                  <EducationTab resume={resume} setResume={setResume} />
                 )}
                 {activeTab === "Skills" && (
-                  <Section title="Skills" description="Core competencies">
-                    {renderSkillsForm()}
-                  </Section>
+                  <SkillsTab
+                    resume={resume}
+                    setResume={setResume}
+                    update={update}
+                  />
                 )}
                 {activeTab === "Projects" && (
-                  <Section
-                    title="Projects"
-                    description="Key builds and deliverables"
-                  >
-                    {renderProjectsForm()}
-                  </Section>
+                  <ProjectsTab resume={resume} setResume={setResume} />
+                )}
+                {activeTab === "Certificates" && (
+                  <CertificatesTab
+                    resume={resume}
+                    setResume={setResume}
+                    update={update}
+                    setPendingFiles={setPendingFiles}
+                  />
+                )}
+                {activeTab === "Publications" && (
+                  <PublicationsTab
+                    resume={resume}
+                    setResume={setResume}
+                    setPendingFiles={setPendingFiles}
+                  />
+                )}
+                {activeTab === "Achievements" && (
+                  <AchievementsTab resume={resume} setResume={setResume} setPendingFiles={setPendingFiles} />
+                )}
+                {activeTab === "Additional" && (
+                  <AdditionalTab
+                    resume={resume}
+                    setResume={setResume}
+                    update={update}
+                  />
                 )}
                 {activeTab === "More" && (
                   <MoreTab
@@ -317,27 +464,12 @@ export default function ResumeBuilder({
           className="hidden lg:flex w-full min-w-0 overflow-hidden"
           style={{ height: "calc(100vh - 54px)" }}
         >
-          {/* Left Panel */}
           <aside
             className="border-r border-slate-200 bg-white shrink-0 overflow-hidden flex flex-col"
             style={{ width: `${formWidth}px` }}
           >
             <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-slate-200 bg-white/95 px-3 py-2 backdrop-blur scroll-slim">
-              {tabs.map(([name, Icon]) => (
-                <button
-                  key={name}
-                  type="button"
-                  className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    activeTab === name
-                      ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                  onClick={() => setActiveTab(name)}
-                >
-                  <Icon size={14} />
-                  {name}
-                </button>
-              ))}
+              {renderTabs()}
             </div>
 
             <div
@@ -345,39 +477,53 @@ export default function ResumeBuilder({
               style={{ maxHeight: "calc(100vh - 54px - 49px)" }}
             >
               {activeTab === "Basics" && (
-                <BasicsTab resume={resume} update={update} />
+                <BasicsTab resume={resume} update={update} setPendingFiles={setPendingFiles} />
               )}
               {activeTab === "Experience" && (
-                <Section
-                  title="Work Experience"
-                  description="Your professional history"
-                >
-                  {renderExperienceForm()}
-                </Section>
+                <ExperienceTab
+                  resume={resume}
+                  setResume={setResume}
+                  update={update}
+                />
               )}
               {activeTab === "Education" && (
-                <Section
-                  title="Education"
-                  description="Degrees and qualifications"
-                >
-                  {renderEducationForm()}
-                </Section>
+                <EducationTab resume={resume} setResume={setResume} />
               )}
               {activeTab === "Skills" && (
-                <Section
-                  title="Skills"
-                  description="Core technical competencies"
-                >
-                  {renderSkillsForm()}
-                </Section>
+                <SkillsTab
+                  resume={resume}
+                  setResume={setResume}
+                  update={update}
+                />
               )}
               {activeTab === "Projects" && (
-                <Section
-                  title="Projects"
-                  description="Key builds and deliverables"
-                >
-                  {renderProjectsForm()}
-                </Section>
+                <ProjectsTab resume={resume} setResume={setResume} />
+              )}
+              {activeTab === "Certificates" && (
+                <CertificatesTab
+                  resume={resume}
+                  setResume={setResume}
+                  update={update}
+                  setPendingFiles={setPendingFiles}
+                />
+              )}
+              {activeTab === "Publications" && (
+                <PublicationsTab
+                  resume={resume}
+                  setResume={setResume}
+                  setPendingFiles={setPendingFiles}
+                />
+              )}
+
+              {activeTab === "Achievements" && (
+                <AchievementsTab resume={resume} setResume={setResume} setPendingFiles={setPendingFiles} />
+              )}
+              {activeTab === "Additional" && (
+                <AdditionalTab
+                  resume={resume}
+                  setResume={setResume}
+                  update={update}
+                />
               )}
               {activeTab === "More" && (
                 <MoreTab
@@ -421,7 +567,6 @@ export default function ResumeBuilder({
             />
           </div>
 
-          {/* Right Live Preview Canvas */}
           <section className="min-w-0 min-h-0 flex-1 overflow-hidden flex flex-col">
             <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur">
               <div className="min-w-0">
@@ -479,7 +624,6 @@ export default function ResumeBuilder({
         </div>
       </div>
 
-      {/* ================= PURE PRINT TARGET (HIDDEN ON SCREEN, REVEALED IN PRINT) ================= */}
       <div id="resume-print-area" className="hidden print:block">
         <ResumeRenderer resumeData={resume} />
       </div>
@@ -487,483 +631,4 @@ export default function ResumeBuilder({
       {!hydrated && <div className="sr-only">Hydrating draft...</div>}
     </>
   );
-
-  // --- Sub-Form Renderers with live bindings ---
-  function renderExperienceForm() {
-    return (
-      <div className="grid gap-3">
-        {experienceEntries.map(([id, item], index) => (
-          <div
-            key={id}
-            className="grid gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5"
-          >
-            <div className="flex items-center justify-between">
-              <strong className="text-xs font-semibold text-slate-900">
-                Experience #{index + 1}
-              </strong>
-              <button
-                type="button"
-                className="text-rose-600 hover:text-rose-800"
-                onClick={() =>
-                  setResume((c) => {
-                    const next = { ...c.workExperience.companies };
-                    delete next[id];
-                    return {
-                      ...c,
-                      workExperience: { ...c.workExperience, companies: next },
-                    };
-                  })
-                }
-              >
-                <IconTrash size={14} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Field
-                label="Job title"
-                value={item.jobTitle}
-                onChange={(v) =>
-                  setMapItem("workExperience", "companies", id, "jobTitle", v)
-                }
-                placeholder="Senior Backend Engineer"
-              />
-              <Field
-                label="Company"
-                value={item.companyName}
-                onChange={(v) =>
-                  setMapItem(
-                    "workExperience",
-                    "companies",
-                    id,
-                    "companyName",
-                    v,
-                  )
-                }
-                placeholder="Company Name"
-              />
-              <Field
-                label="Start Date"
-                type="month"
-                value={item.startDate}
-                onChange={(v) =>
-                  setMapItem("workExperience", "companies", id, "startDate", v)
-                }
-              />
-              <Field
-                label="End Date"
-                type="month"
-                value={item.endDate}
-                onChange={(v) =>
-                  setMapItem("workExperience", "companies", id, "endDate", v)
-                }
-              />
-            </div>
-
-            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
-              <input
-                type="checkbox"
-                checked={!!item.isPresentJob}
-                onChange={(e) =>
-                  setMapItem(
-                    "workExperience",
-                    "companies",
-                    id,
-                    "isPresentJob",
-                    e.target.checked,
-                  )
-                }
-              />
-              Currently working here
-            </label>
-
-            <AreaField
-              label="Responsibilities (One bullet per line)"
-              value={(item.responsibility || []).join("\n")}
-              onChange={(v) =>
-                setMapItem(
-                  "workExperience",
-                  "companies",
-                  id,
-                  "responsibility",
-                  v.split("\n"),
-                )
-              }
-              placeholder="Architected streaming microservices..."
-            />
-          </div>
-        ))}
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
-          onClick={() => {
-            const id = `comp-${Date.now()}`;
-            setResume((c) => ({
-              ...c,
-              workExperience: {
-                ...c.workExperience,
-                companies: {
-                  ...(c.workExperience?.companies || {}),
-                  [id]: {
-                    priority:
-                      Object.keys(c.workExperience?.companies || {}).length + 1,
-                    jobTitle: "",
-                    companyName: "",
-                    jobConditions: "REMOTE",
-                    jobTypes: "FULL_TIME",
-                    jobLocation: "Pune, India",
-                    responsibility: [""],
-                    startDate: "",
-                    endDate: "",
-                    isPresentJob: true,
-                  },
-                },
-              },
-            }));
-          }}
-        >
-          <IconPlus size={14} /> Add Experience
-        </button>
-      </div>
-    );
-  }
-
-  function renderEducationForm() {
-    return (
-      <div className="grid gap-3">
-        {educationEntries.map(([id, item], index) => (
-          <div
-            key={id}
-            className="grid gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5"
-          >
-            <div className="flex items-center justify-between">
-              <strong className="text-xs font-semibold text-slate-900">
-                Education #{index + 1}
-              </strong>
-              <button
-                type="button"
-                className="text-rose-600 hover:text-rose-800"
-                onClick={() =>
-                  setResume((c) => {
-                    const next = { ...c.educations.qualifications };
-                    delete next[id];
-                    return {
-                      ...c,
-                      educations: { ...c.educations, qualifications: next },
-                    };
-                  })
-                }
-              >
-                <IconTrash size={14} />
-              </button>
-            </div>
-
-            <Field
-              label="Institution"
-              value={item.institutionName}
-              onChange={(v) =>
-                setMapItem(
-                  "educations",
-                  "qualifications",
-                  id,
-                  "institutionName",
-                  v,
-                )
-              }
-              placeholder="Institute Name"
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <Field
-                label="Started At"
-                type="month"
-                value={item.startedAt}
-                onChange={(v) =>
-                  setMapItem("educations", "qualifications", id, "startedAt", v)
-                }
-              />
-              <Field
-                label="Year of Complete"
-                type="month"
-                value={item.yearOfComplete}
-                onChange={(v) =>
-                  setMapItem(
-                    "educations",
-                    "qualifications",
-                    id,
-                    "yearOfComplete",
-                    v,
-                  )
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Field
-                label="Degree / Major"
-                value={item.description}
-                onChange={(v) =>
-                  setMapItem(
-                    "educations",
-                    "qualifications",
-                    id,
-                    "description",
-                    v,
-                  )
-                }
-                placeholder="B.Tech Computer Science"
-              />
-              <Field
-                label="Marks / CGPA"
-                value={item.percentage}
-                onChange={(v) =>
-                  setMapItem(
-                    "educations",
-                    "qualifications",
-                    id,
-                    "percentage",
-                    v,
-                  )
-                }
-                placeholder="8.8 CGPA"
-              />
-            </div>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
-          onClick={() => {
-            const id = `edu-${Date.now()}`;
-            setResume((c) => ({
-              ...c,
-              educations: {
-                ...c.educations,
-                qualifications: {
-                  ...(c.educations?.qualifications || {}),
-                  [id]: {
-                    priority:
-                      Object.keys(c.educations?.qualifications || {}).length +
-                      1,
-                    institutionName: "",
-                    startedAt: "",
-                    yearOfComplete: "",
-                    pursuing: false,
-                    percentage: "",
-                    description: "",
-                  },
-                },
-              },
-            }));
-          }}
-        >
-          <IconPlus size={14} /> Add Education
-        </button>
-      </div>
-    );
-  }
-
-  function renderSkillsForm() {
-    return (
-      <div className="grid gap-3">
-        {skillGroups.map(([group, skills]) => (
-          <div
-            key={group}
-            className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5"
-          >
-            <div className="flex items-center justify-between">
-              <strong className="text-xs font-semibold text-slate-800">
-                {group}
-              </strong>
-              <button
-                type="button"
-                className="text-rose-500 hover:text-rose-700"
-                onClick={() =>
-                  setResume((r) => {
-                    const next = { ...r.skills.skills };
-                    delete next[group];
-                    return { ...r, skills: { ...r.skills, skills: next } };
-                  })
-                }
-              >
-                <IconTrash size={14} />
-              </button>
-            </div>
-            <Field
-              label="Category Name"
-              value={group}
-              onChange={(v) =>
-                setResume((r) => {
-                  const next = { ...r.skills.skills };
-                  delete next[group];
-                  next[v || "New Category"] = skills;
-                  return { ...r, skills: { ...r.skills, skills: next } };
-                })
-              }
-            />
-            <Field
-              label="Skills (Comma-separated)"
-              value={skills.join(", ")}
-              onChange={(v) =>
-                update(
-                  `skills.skills.${group}`,
-                  v
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter(Boolean),
-                )
-              }
-              placeholder="TypeScript, Node.js, MongoDB"
-            />
-          </div>
-        ))}
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
-          onClick={() =>
-            setResume((r) => ({
-              ...r,
-              skills: {
-                ...r.skills,
-                skills: {
-                  ...r.skills.skills,
-                  [`Skill Group ${Object.keys(r.skills.skills || {}).length + 1}`]:
-                    [],
-                },
-              },
-            }))
-          }
-        >
-          <IconPlus size={14} /> Add Skill Group
-        </button>
-      </div>
-    );
-  }
-
-  function renderProjectsForm() {
-    return (
-      <div className="grid gap-3">
-        {projectEntries.map(([id, item], index) => (
-          <div
-            key={id}
-            className="grid gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5"
-          >
-            <div className="flex items-center justify-between">
-              <strong className="text-xs font-semibold text-slate-900">
-                Project #{index + 1}
-              </strong>
-              <button
-                type="button"
-                className="text-rose-600 hover:text-rose-800"
-                onClick={() =>
-                  setResume((c) => {
-                    const next = { ...c.projects.projects };
-                    delete next[id];
-                    return {
-                      ...c,
-                      projects: { ...c.projects, projects: next },
-                    };
-                  })
-                }
-              >
-                <IconTrash size={14} />
-              </button>
-            </div>
-
-            <Field
-              label="Project name"
-              value={item.name}
-              onChange={(v) =>
-                setMapItem("projects", "projects", id, "name", v)
-              }
-              placeholder="Project Name"
-            />
-            <AreaField
-              label="Description"
-              value={item.description}
-              onChange={(v) =>
-                setMapItem("projects", "projects", id, "description", v)
-              }
-              placeholder="Engineered high throughput API..."
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <Field
-                label="Start Date"
-                type="month"
-                value={item.startDate}
-                onChange={(v) =>
-                  setMapItem("projects", "projects", id, "startDate", v)
-                }
-              />
-              <Field
-                label="End Date"
-                type="month"
-                value={item.endDate}
-                onChange={(v) =>
-                  setMapItem("projects", "projects", id, "endDate", v)
-                }
-              />
-            </div>
-            <Field
-              label="Project URL"
-              value={item.projectUrl}
-              onChange={(v) =>
-                setMapItem("projects", "projects", id, "projectUrl", v)
-              }
-              placeholder="https://github.com/..."
-            />
-            <Field
-              label="Tech Stack (Comma-separated)"
-              value={(item.techStack || []).join(", ")}
-              onChange={(v) =>
-                setMapItem(
-                  "projects",
-                  "projects",
-                  id,
-                  "techStack",
-                  v
-                    .split(",")
-                    .map((s) => s.trim())
-                    .filter(Boolean),
-                )
-              }
-              placeholder="Node.js, Docker, Redis"
-            />
-          </div>
-        ))}
-
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
-          onClick={() => {
-            const id = `proj-${Date.now()}`;
-            setResume((c) => ({
-              ...c,
-              projects: {
-                ...c.projects,
-                projects: {
-                  ...(c.projects?.projects || {}),
-                  [id]: {
-                    priority:
-                      Object.keys(c.projects?.projects || {}).length + 1,
-                    name: "",
-                    description: "",
-                    projectUrl: "",
-                    startDate: "",
-                    endDate: "",
-                    isWorking: true,
-                    techStack: [],
-                    skills: [],
-                  },
-                },
-              },
-            }));
-          }}
-        >
-          <IconPlus size={14} /> Add Project
-        </button>
-      </div>
-    );
-  }
 }

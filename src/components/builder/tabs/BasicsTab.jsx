@@ -1,5 +1,5 @@
 // components/builder/tabs/BasicsTab.jsx
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   IconPhone,
   IconMapPin,
@@ -9,22 +9,29 @@ import {
   IconUpload,
   IconTrash,
   IconPhoto,
+  IconCheck,
 } from "@tabler/icons-react";
 import { Field, AreaField, Section } from "../controls/FormControls";
 import { TEMPLATE_DEFINITIONS } from "@/lib/resume-data";
 
-export default function BasicsTab({ resume, update }) {
+export default function BasicsTab({ resume, update, setPendingFiles }) {
   const fileInputRef = useRef(null);
   const activeTemplateDef =
     TEMPLATE_DEFINITIONS.find((t) => t.id === resume.templateName) ||
     TEMPLATE_DEFINITIONS[0];
 
+  // Local state for the custom Key-Value dynamic pairs builder added at the bottom
+  const [customKey, setCustomKey] = useState("");
+  const [customValue, setCustomValue] = useState("");
+  const [customPairs, setCustomPairs] = useState([]);
+
   const handleAvatarUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Instant local preview URL
+    // Keep the actual file outside resume JSON; the backend receives it as multipart data.
     const previewUrl = URL.createObjectURL(file);
+    setPendingFiles?.((current) => ({ ...current, avatar: file }));
     update("avatar", {
       url: previewUrl,
       key: `local-${Date.now()}`,
@@ -33,8 +40,24 @@ export default function BasicsTab({ resume, update }) {
   };
 
   const removeAvatar = () => {
+    setPendingFiles?.((current) => {
+      const next = { ...current };
+      delete next.avatar;
+      return next;
+    });
     update("avatar", { url: "", key: "" });
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleAddPair = () => {
+    if (!customKey.trim() || !customValue.trim()) return;
+    setCustomPairs((prev) => [...prev, { id: Date.now(), key: customKey.trim(), value: customValue.trim() }]);
+    setCustomKey("");
+    setCustomValue("");
+  };
+
+  const handleRemovePair = (id) => {
+    setCustomPairs((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
@@ -100,25 +123,48 @@ export default function BasicsTab({ resume, update }) {
             value={resume.basicInfo?.fullName}
             onChange={(v) => update("basicInfo.fullName", v)}
             placeholder="Aarav Mehta"
+            isRequired={true}
           />
           <Field
             label="Target role"
             value={resume.basicInfo?.position}
-            onChange={(v) => update("basicInfo.position", v)}
+            onChange={(v) => {
+              update("basicInfo.position", v);
+              update("profileSummary.subject", v);
+            }}
             placeholder="Senior Backend Engineer"
+            isRequired={true}
           />
           <Field
-            label="Email"
+            label="Primary Email"
             type="email"
             value={resume.contactInfo?.primaryEmail}
             onChange={(v) => update("contactInfo.primaryEmail", v)}
             placeholder="aarav.mehta@example.com"
+            isRequired={true}
           />
           <Field
-            label="Phone"
+            label="Alternative Email"
+            type="email"
+            value={resume.contactInfo?.secondaryEmail}
+            onChange={(v) => update("contactInfo.secondaryEmail", v)}
+            placeholder="secondary@example.com"
+          />
+
+          <Field
+            label="Primary Mobile"
             icon={IconPhone}
             value={resume.contactInfo?.primaryMobile}
             onChange={(v) => update("contactInfo.primaryMobile", v)}
+            placeholder="+91 98765 43210"
+            isRequired={true}
+          />
+
+          <Field
+            label="Alternative Mobile"
+            icon={IconPhone}
+            value={resume.contactInfo?.secondaryMobile}
+            onChange={(v) => update("contactInfo.secondaryMobile", v)}
             placeholder="+91 98765 43210"
           />
         </div>
@@ -130,25 +176,59 @@ export default function BasicsTab({ resume, update }) {
           value={resume.profileSummary?.objective}
           onChange={(v) => update("profileSummary.objective", v)}
           placeholder="Describe your technical strengths, track record and value..."
+          isRequired={true}
         />
       </Section>
 
-      <Section title="Location & links" description="Location and external URLs">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Section
+        title="Location & links"
+        description="Location and external URLs"
+      >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-4">
+          <Field
+            label="Street Name"
+            icon={IconMapPin}
+            value={resume.address?.streetName}
+            onChange={(v) => update("address.streetName", v)}
+            placeholder="Netaji Subhash Chandra Bose Road"
+            isRequired={true}
+          />
+
           <Field
             label="City"
             icon={IconMapPin}
             value={resume.address?.city}
             onChange={(v) => update("address.city", v)}
-            placeholder="Pune"
+            placeholder="Kolkata"
+            isRequired={true}
           />
+
+          <Field
+            label="District"
+            icon={IconMapPin}
+            value={resume.address?.district}
+            onChange={(v) => update("address.district", v)}
+            placeholder="South 24 Pargana"
+          />
+
+          <Field
+            label="Pincode"
+            icon={IconMapPin}
+            value={resume.address?.pincode}
+            onChange={(v) => update("address.pincode", v)}
+            placeholder="711011"
+          />
+
+
           <Field
             label="Country"
             value={resume.address?.country}
             onChange={(v) => update("address.country", v)}
             placeholder="India"
+            isRequired={true}
           />
         </div>
+
         <Field
           label="LinkedIn"
           icon={IconBrandLinkedin}
@@ -170,6 +250,61 @@ export default function BasicsTab({ resume, update }) {
           onChange={(v) => update("contactInfo.portfolio", v)}
           placeholder="https://aaravmehta.dev"
         />
+
+        {/* //! Completed Custom Key-Value Section */}
+        <section id="key_value" className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm">
+          <div className="mb-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Custom Attributes / Metadata</h4>
+            <p className="text-[11px] text-slate-500">Add custom key-value metadata fields if needed.</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <Field
+              label="Information Heading"
+              value={customKey}
+              onChange={(v) => setCustomKey(v)}
+              placeholder="e.g. Availability"
+            />
+
+            <Field
+              label="Information"
+              value={customValue}
+              onChange={(v) => setCustomValue(v)}
+              placeholder="e.g. Immediate"
+            />
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleAddPair}
+              className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700"
+            >
+              <IconCheck size={14} /> Confirm
+            </button>
+
+          </div>
+
+          {customPairs.length > 0 && (
+            <div id="preview" className="mt-4 grid gap-2 border-t border-slate-200 pt-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">Added Attributes:</span>
+              {customPairs.map((pair) => (
+                <div key={pair.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
+                  <div>
+                    <strong className="text-slate-800">{pair.key}:</strong> <span className="text-slate-600">{pair.value}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePair(pair.id)}
+                    className="text-rose-500 hover:text-rose-700"
+                  >
+                    <IconTrash size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </Section>
     </>
   );

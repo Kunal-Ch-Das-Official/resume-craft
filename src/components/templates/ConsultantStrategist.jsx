@@ -1,8 +1,9 @@
 // components/templates/ConsultantStrategist.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
-export default function ConsultantStrategist({ data }) {
+export default function ConsultantStrategist({ data, compact = false }) {
   const { basicInfo, address, contactInfo, profileSummary, workExperience, skills } = data;
   const companies = sortByPriority(toArray(workExperience?.companies));
   const skillMap = skills?.skills || {};
@@ -10,7 +11,7 @@ export default function ConsultantStrategist({ data }) {
 
   return (
     <div
-      className="max-w-4xl mx-auto p-10 bg-white font-sans text-neutral-800 border-l-8"
+      className="max-w-4xl mx-auto p-10 bg-white font-sans text-neutral-800 border-l-8 flex flex-col"
       style={{ borderLeftColor: theme.accent }}
     >
       <div className="border-b pb-4 mb-6">
@@ -22,7 +23,7 @@ export default function ConsultantStrategist({ data }) {
       </div>
 
       {profileSummary?.objective && (
-        <div className="mb-6 p-4 border rounded" style={{ backgroundColor: theme.soft, borderColor: theme.border }}>
+        <div className="mb-6 p-4 border rounded" style={{ backgroundColor: theme.soft, borderColor: theme.border, order: getSectionOrder(data, "profileSummary", 1) }}>
           <h2 className="text-xs uppercase font-bold mb-1" style={{ color: theme.accent }}>
             Executive Briefing
           </h2>
@@ -31,7 +32,7 @@ export default function ConsultantStrategist({ data }) {
       )}
 
       {companies.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2
             className="text-xs uppercase font-bold border-b-2 pb-1 mb-3"
             style={{ color: theme.accent, borderBottomColor: theme.accent }}
@@ -53,7 +54,7 @@ export default function ConsultantStrategist({ data }) {
       )}
 
       {Object.keys(skillMap).length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "skills", 6) }}>
           <h2
             className="text-xs uppercase font-bold border-b-2 pb-1 mb-2"
             style={{ color: theme.accent, borderBottomColor: theme.accent }}
@@ -69,6 +70,14 @@ export default function ConsultantStrategist({ data }) {
           </div>
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["profileSummary", "workExperience", "skills"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

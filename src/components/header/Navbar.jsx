@@ -9,11 +9,13 @@ import {
   IconLayoutGrid,
   IconMenu2,
   IconMessage,
-  IconSparkles,
   IconX,
+  IconUserKey,
 } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import brandLogo from "../../../public/remove_builder.png";
 
 const LINKS = [
   {
@@ -71,13 +73,21 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="group flex items-center gap-2.5"
+          className="group flex items-center"
           onClick={() => setOpen(false)}
         >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 text-white shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105">
-            <IconSparkles size={18} className="drop-shadow-sm" />
-
-            <span className="absolute -inset-0.5 rounded-xl bg-gradient-to-br from-indigo-400 to-fuchsia-400 opacity-0 blur transition-opacity group-hover:opacity-50" />
+          <span
+            className="
+          transition-transform group-hover:scale-105"
+          >
+            <Image
+              src={brandLogo}
+              alt="ResumeCraft Logo"
+              width={100}
+              height={100}
+              priority
+              className="h-12 w-12"
+            />
           </span>
 
           <span className="text-lg font-extrabold tracking-tight text-slate-900">
@@ -92,8 +102,7 @@ export default function Navbar() {
         <nav className="hidden lg:flex items-center gap-1">
           {LINKS.map(({ name, href, icon: Icon }) => {
             const active =
-              pathname === href ||
-              (href !== "/" && pathname.startsWith(href));
+              pathname === href || (href !== "/" && pathname.startsWith(href));
 
             return (
               <Link
@@ -126,6 +135,16 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/account"
+            className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-green-700 px-4 py-2.5
+             text-sm font-semibold text-black shadow-lg shadow-slate-900/20
+             transition-all hover:bg-green-800 hover:shadow-slate-900/30 active:scale-[0.97]"
+          >
+            Account
+            <IconUserKey size={15} />
+          </Link>
+
           <Link
             href="/build-resume"
             className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30 active:scale-[0.97]"
@@ -176,7 +195,20 @@ export default function Navbar() {
               );
             })}
 
+
+
             <Link
+              href="/account"
+              onClick={() => setOpen(false)}
+              className="mt-1 flex items-center justify-between rounded-lg
+              bg-white px-3 py-2.5 text-sm font-semibold text-black shadow-lg shadow-slate-900/20
+              hover:shadow-slate-900/30 border border-slate-900/30 mb-2"
+            >
+              Account
+              <IconUserKey size={16} />
+            </Link>
+
+                        <Link
               href="/build-resume"
               onClick={() => setOpen(false)}
               className="mt-1 flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white"

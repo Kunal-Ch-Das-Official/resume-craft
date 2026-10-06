@@ -1,10 +1,12 @@
 // components/templates/TechModernist.jsx
 import React from "react";
+import ResumeExtraSections from "./ResumeExtraSections";
 import {
   toArray,
   sortByPriority,
   formatDate,
   getTheme,
+  getSectionOrder,
 } from "../utils/resumeHelpers.js";
 
 export default function TechModernist({ data, compact = false }) {
@@ -29,7 +31,7 @@ export default function TechModernist({ data, compact = false }) {
 
   return (
     <div
-      className="max-w-4xl mx-auto p-8 bg-slate-50 text-slate-800 font-sans border-t-8"
+      className="max-w-4xl mx-auto p-8 bg-slate-50 text-slate-800 font-sans border-t-8 flex flex-col"
       style={{ borderTopColor: theme.accent }}
     >
       <div className="flex items-center gap-6 pb-6 border-b border-slate-200 mb-6">
@@ -89,7 +91,7 @@ export default function TechModernist({ data, compact = false }) {
       </div>
 
       {Object.keys(skillMap).length > 0 && (
-        <div className="mb-6 bg-white p-4 rounded-lg border border-slate-200 shadow-xs">
+        <div className="mb-6 bg-white p-4 rounded-lg border border-slate-200 shadow-xs" style={{ order: getSectionOrder(data, "skills", 6) }}>
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
             {skills?.sectionTitle || "Technical Competencies"}
           </h2>
@@ -120,7 +122,7 @@ export default function TechModernist({ data, compact = false }) {
       )}
 
       {companies.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2
             className="text-base font-bold text-slate-900 border-b-2 pb-1 mb-4"
             style={{ borderBottomColor: theme.accent }}
@@ -157,7 +159,7 @@ export default function TechModernist({ data, compact = false }) {
       )}
 
       {projectList.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "projects", 3) }}>
           <h2
             className="text-base font-bold text-slate-900 border-b-2 pb-1 mb-4"
             style={{ borderBottomColor: theme.accent }}
@@ -210,7 +212,7 @@ export default function TechModernist({ data, compact = false }) {
       )}
 
       {qualifications.length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "educations", 4) }}>
           <h2
             className="text-base font-bold text-slate-900 border-b-2 pb-1 mb-3"
             style={{ borderBottomColor: theme.accent }}
@@ -229,6 +231,14 @@ export default function TechModernist({ data, compact = false }) {
           ))}
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["skills", "workExperience", "projects", "educations"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

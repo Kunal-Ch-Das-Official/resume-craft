@@ -1,6 +1,7 @@
 // components/templates/TwoColumnSplit.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
 export default function TwoColumnSplit({ data, compact = false }) {
   const { basicInfo, avatar, address, contactInfo, profileSummary, workExperience, educations, skills } = data;
@@ -63,15 +64,15 @@ export default function TwoColumnSplit({ data, compact = false }) {
         </div>
       </aside>
 
-      <main className="w-2/3 p-8 text-slate-800">
-        <div className="mb-6">
+      <main className="w-2/3 p-8 text-slate-800 flex flex-col">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "profileSummary", 1) }}>
           <h1 className="text-3xl font-extrabold text-slate-900">{basicInfo?.fullName}</h1>
           <p className="text-base font-semibold" style={{ color: theme.accent }}>{basicInfo?.position}</p>
           {profileSummary?.objective && <p className="text-xs text-slate-600 mt-2">{profileSummary.objective}</p>}
         </div>
 
         {companies.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">
               Experience
             </h2>
@@ -92,7 +93,7 @@ export default function TwoColumnSplit({ data, compact = false }) {
         )}
 
         {qualifications.length > 0 && (
-          <div>
+          <div style={{ order: getSectionOrder(data, "educations", 4) }}>
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">
               Education
             </h2>
@@ -104,7 +105,15 @@ export default function TwoColumnSplit({ data, compact = false }) {
             ))}
           </div>
         )}
-      </main>
+      
+      <ResumeExtraSections
+        data={data}
+        exclude={["profileSummary", "workExperience", "educations", "skills"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</main>
     </div>
   );
 }

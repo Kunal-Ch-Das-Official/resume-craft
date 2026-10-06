@@ -1,15 +1,16 @@
 // components/templates/InternationalEuropass.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
-export default function InternationalEuropass({ data }) {
+export default function InternationalEuropass({ data, compact = false }) {
   const { basicInfo, avatar, address, contactInfo, workExperience, educations, languageProficiency } = data;
   const companies = sortByPriority(toArray(workExperience?.companies));
   const qualifications = sortByPriority(toArray(educations?.qualifications));
   const theme = getTheme(data.themeColor);
 
   return (
-    <div className="max-w-4xl mx-auto p-10 bg-white font-sans text-slate-800 text-xs">
+    <div className="max-w-4xl mx-auto p-10 bg-white font-sans text-slate-800 text-xs flex flex-col">
       <div
         className="flex gap-6 border-b-2 pb-6 mb-6"
         style={{ borderBottomColor: theme.accent }}
@@ -28,7 +29,7 @@ export default function InternationalEuropass({ data }) {
       </div>
 
       {companies.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2 className="text-xs uppercase font-bold border-b border-slate-300 pb-1 mb-3" style={{ color: theme.accent }}>
             Work Experience
           </h2>
@@ -50,7 +51,7 @@ export default function InternationalEuropass({ data }) {
       )}
 
       {qualifications.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "educations", 4) }}>
           <h2 className="text-xs uppercase font-bold border-b border-slate-300 pb-1 mb-2" style={{ color: theme.accent }}>
             Education and Training
           </h2>
@@ -64,7 +65,7 @@ export default function InternationalEuropass({ data }) {
       )}
 
       {languageProficiency?.languageKnows && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "languageProficiency", 10) }}>
           <h2 className="text-xs uppercase font-bold border-b border-slate-300 pb-1 mb-2" style={{ color: theme.accent }}>
             Language Competence
           </h2>
@@ -78,6 +79,14 @@ export default function InternationalEuropass({ data }) {
           </div>
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["workExperience", "educations", "languageProficiency"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

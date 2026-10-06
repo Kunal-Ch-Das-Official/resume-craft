@@ -1,8 +1,9 @@
 // components/templates/CleanAtsOptimizer.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
-export default function CleanAtsOptimizer({ data }) {
+export default function CleanAtsOptimizer({ data, compact = false }) {
   const { basicInfo, address, contactInfo, profileSummary, workExperience, educations, skills } = data;
   const companies = sortByPriority(toArray(workExperience?.companies));
   const qualifications = sortByPriority(toArray(educations?.qualifications));
@@ -10,7 +11,7 @@ export default function CleanAtsOptimizer({ data }) {
   const theme = getTheme(data.themeColor);
 
   return (
-    <div className="max-w-3xl mx-auto p-8 bg-white text-black font-sans leading-tight text-xs">
+    <div className="max-w-3xl mx-auto p-8 bg-white text-black font-sans leading-tight text-xs flex flex-col">
       <div
         className="text-center pb-2 mb-4 border-b-2"
         style={{ borderBottomColor: theme.accent }}
@@ -25,14 +26,14 @@ export default function CleanAtsOptimizer({ data }) {
       </div>
 
       {profileSummary?.objective && (
-        <div className="mb-4">
+        <div className="mb-4" style={{ order: getSectionOrder(data, "profileSummary", 1) }}>
           <h2 className="font-bold uppercase border-b border-gray-400 mb-1">Professional Summary</h2>
           <p className="text-slate-700">{profileSummary.objective}</p>
         </div>
       )}
 
       {companies.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2 className="font-bold uppercase border-b border-gray-400 mb-2">Work Experience</h2>
           {companies.map((c, i) => (
             <div key={i} className="mb-3">
@@ -49,7 +50,7 @@ export default function CleanAtsOptimizer({ data }) {
       )}
 
       {qualifications.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4" style={{ order: getSectionOrder(data, "educations", 4) }}>
           <h2 className="font-bold uppercase border-b border-gray-400 mb-2">Education</h2>
           {qualifications.map((q, i) => (
             <div key={i} className="flex justify-between mb-1 text-slate-900">
@@ -61,7 +62,7 @@ export default function CleanAtsOptimizer({ data }) {
       )}
 
       {Object.keys(skillMap).length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "skills", 6) }}>
           <h2 className="font-bold uppercase border-b border-gray-400 mb-1">Skills</h2>
           {Object.entries(skillMap).map(([category, list], i) => (
             <p key={i} className="text-slate-800">
@@ -70,6 +71,14 @@ export default function CleanAtsOptimizer({ data }) {
           ))}
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["profileSummary", "workExperience", "educations", "skills"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

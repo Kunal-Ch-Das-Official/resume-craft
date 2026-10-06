@@ -1,6 +1,7 @@
 // components/templates/EntryLevelGraduate.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
 export default function EntryLevelGraduate({ data, compact = false }) {
   const { basicInfo, address, contactInfo, educations, projects, certifications } = data;
@@ -12,7 +13,7 @@ export default function EntryLevelGraduate({ data, compact = false }) {
   const LinkTag = compact ? "span" : "a";
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white font-sans text-neutral-800">
+    <div className="max-w-4xl mx-auto p-8 bg-white font-sans text-neutral-800 flex flex-col">
       <div
         className="text-center pb-4 border-b-2 mb-6"
         style={{ borderBottomColor: theme.accent }}
@@ -25,7 +26,7 @@ export default function EntryLevelGraduate({ data, compact = false }) {
       </div>
 
       {qualifications.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "educations", 4) }}>
           <h2 className="text-xs uppercase font-bold tracking-wider text-neutral-500 border-b pb-1 mb-3">
             Education & Qualifications
           </h2>
@@ -43,7 +44,7 @@ export default function EntryLevelGraduate({ data, compact = false }) {
       )}
 
       {projectList.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "projects", 3) }}>
           <h2 className="text-xs uppercase font-bold tracking-wider text-neutral-500 border-b pb-1 mb-3">
             Academic & Personal Projects
           </h2>
@@ -68,7 +69,7 @@ export default function EntryLevelGraduate({ data, compact = false }) {
       )}
 
       {certs.length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "certifications", 5) }}>
           <h2 className="text-xs uppercase font-bold tracking-wider text-neutral-500 border-b pb-1 mb-2">
             Certificates
           </h2>
@@ -79,6 +80,14 @@ export default function EntryLevelGraduate({ data, compact = false }) {
           ))}
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["educations", "projects", "certifications"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

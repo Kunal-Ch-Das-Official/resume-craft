@@ -1,6 +1,7 @@
 // components/templates/CreativeProfessional.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
 export default function CreativeProfessional({ data, compact = false }) {
   const { basicInfo, avatar, contactInfo, profileSummary, projects, workExperience } = data;
@@ -11,7 +12,7 @@ export default function CreativeProfessional({ data, compact = false }) {
   const LinkTag = compact ? "span" : "a";
 
   return (
-    <div className="max-w-4xl mx-auto p-10 bg-white font-sans text-neutral-800">
+    <div className="max-w-4xl mx-auto p-10 bg-white font-sans text-neutral-800 flex flex-col">
       <div
         className="flex justify-between items-start mb-8 pb-8 border-b-4"
         style={{ borderBottomColor: theme.accent }}
@@ -43,13 +44,13 @@ export default function CreativeProfessional({ data, compact = false }) {
       </div>
 
       {profileSummary?.objective && (
-        <div className="mb-8">
+        <div className="mb-8" style={{ order: getSectionOrder(data, "profileSummary", 1) }}>
           <p className="text-base text-neutral-600 font-light leading-relaxed">{profileSummary.objective}</p>
         </div>
       )}
 
       {projectList.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-8" style={{ order: getSectionOrder(data, "projects", 3) }}>
           <h2 className="text-xs uppercase font-extrabold tracking-widest text-neutral-400 mb-4">Featured Work</h2>
           <div className="grid grid-cols-2 gap-4">
             {projectList.map((p, i) => (
@@ -85,7 +86,7 @@ export default function CreativeProfessional({ data, compact = false }) {
       )}
 
       {companies.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-8" style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2 className="text-xs uppercase font-extrabold tracking-widest text-neutral-400 mb-4">Work Experience</h2>
           {companies.map((c, i) => (
             <div key={i} className="mb-4">
@@ -102,6 +103,14 @@ export default function CreativeProfessional({ data, compact = false }) {
           ))}
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["profileSummary", "projects", "workExperience"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }

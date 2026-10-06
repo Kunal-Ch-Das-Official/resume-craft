@@ -1,6 +1,7 @@
 // components/templates/StartupInnovator.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
 export default function StartupInnovator({ data, compact = false }) {
   const { basicInfo, avatar, contactInfo, projects, workExperience } = data;
@@ -12,7 +13,7 @@ export default function StartupInnovator({ data, compact = false }) {
 
   return (
     <div
-      className="max-w-4xl mx-auto p-8 bg-zinc-900 text-zinc-100 font-sans border-2 rounded-xl"
+      className="max-w-4xl mx-auto p-8 bg-zinc-900 text-zinc-100 font-sans border-2 rounded-xl flex flex-col"
       style={{ borderColor: theme.accent }}
     >
       <div className="flex justify-between items-center border-b border-zinc-800 pb-4 mb-6">
@@ -47,7 +48,7 @@ export default function StartupInnovator({ data, compact = false }) {
       </div>
 
       {projectList.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "projects", 3) }}>
           <h2 className="text-xs uppercase font-mono tracking-widest mb-3" style={{ color: theme.hex }}>
             // Key Ventures & Builds
           </h2>
@@ -81,7 +82,7 @@ export default function StartupInnovator({ data, compact = false }) {
       )}
 
       {companies.length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2 className="text-xs uppercase font-mono tracking-widest mb-3" style={{ color: theme.hex }}>
             // Track Record
           </h2>
@@ -98,6 +99,14 @@ export default function StartupInnovator({ data, compact = false }) {
           ))}
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["projects", "workExperience"]}
+        compact={compact}
+        theme={theme}
+        dark={true}
+      />
+</div>
   );
 }

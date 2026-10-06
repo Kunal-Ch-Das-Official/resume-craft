@@ -154,7 +154,7 @@ export const DEMO_RESUME = {
     position: "Senior Backend Engineer",
   },
   avatar: {
-    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80",
+    url: "https://res.cloudinary.com/drdfur81n/image/upload/v1791209555/resume_default_avatar_xlmtdz.png?auto=format&fit=crop&w=400&h=400&q=80",
     key: "avatar-demo",
   },
   address: {
@@ -166,7 +166,9 @@ export const DEMO_RESUME = {
   },
   contactInfo: {
     primaryEmail: "aarav.mehta@example.com",
+    secondaryEmail: "aarav.secondary@example.com",
     primaryMobile: "+919876543210",
+    secondaryMobile: "+919876543211",
     linkedin: "https://linkedin.com/in/aarav-mehta",
     github: "https://github.com/aarav-mehta",
     portfolio: "https://aaravmehta.dev",
@@ -287,22 +289,14 @@ export const DEMO_RESUME = {
         overview: "AWS Certified Solutions Architect – Associate",
         skillLearned: ["AWS", "VPC", "ECS", "DynamoDB", "S3"],
         duration: "3 months",
-        certificateContent: {
-          title: "AWS_Solutions_Architect.pdf",
-          url: "https://example.com/certs/aws.pdf",
-          key: "cert-aws",
-        },
+        certificateUrl: "https://www.credly.com/",
       },
       "cert-2": {
         priority: 2,
         overview: "Certified Kubernetes Administrator (CKA)",
         skillLearned: ["Kubernetes", "Helm", "Cluster Ingress", "RBAC"],
         duration: "2 months",
-        certificateContent: {
-          title: "CKA_Certificate.pdf",
-          url: "https://example.com/certs/cka.pdf",
-          key: "cert-cka",
-        },
+        certificateUrl: "https://www.cncf.io/certification/cka/",
       },
     },
   },
@@ -343,30 +337,14 @@ export const DEMO_RESUME = {
         description:
           "Distributed Tracing Patterns in Modern Cloud-Native Architectures (IEEE Transactions 2025)",
         referenceUrl: "https://doi.org/10.1109/sample.2025",
-        publicationReference: [
-          {
-            title: "IEEE_Paper_Manuscript.pdf",
-            accessUrl: {
-              url: "https://example.com/paper.pdf",
-              key: "pub-paper",
-            },
-          },
-        ],
+        publicationReference: [],
       },
       "pub-2": {
         priority: 2,
         description:
           "Zero-Cost Cache Invalidation via Redis Streams (ACM Distributed Systems Review 2024)",
         referenceUrl: "https://doi.org/10.1145/sample.2024",
-        publicationReference: [
-          {
-            title: "ACM_Review_Preprint.pdf",
-            accessUrl: {
-              url: "https://example.com/preprint.pdf",
-              key: "pub-preprint",
-            },
-          },
-        ],
+        publicationReference: [],
       },
     },
   },
@@ -389,6 +367,18 @@ export const DEMO_RESUME = {
       },
     ],
   },
+  openSource: {
+    priority: 9,
+    sectionTitle: "Open Source",
+    contributions: {
+      "Subatom Framework": {
+        priority: 1,
+        githubUrl: "https://github.com/example/subatom",
+        description: "Contributed runtime and developer-experience improvements to an open-source TypeScript backend framework.",
+        duration: "2025 – Present",
+      },
+    },
+  },
   languageProficiency: {
     priority: 10,
     sectionTitle: "Languages",
@@ -397,6 +387,12 @@ export const DEMO_RESUME = {
       { languageName: "Hindi", proficiencyOutOfTen: 10 },
       { languageName: "Marathi", proficiencyOutOfTen: 8 },
     ],
+  },
+  hobbies: {
+    priority: 11,
+    sectionTitle: "Hobbies",
+    Photography: "Street photography and visual storytelling",
+    Reading: "Technology, business and systems design",
   },
   templateName: "clean-ats-optimizer",
   themeColor: "light-blue",
@@ -408,7 +404,9 @@ export const EMPTY_RESUME = {
   address: { streetName: "", city: "", district: "", pincode: "", country: "" },
   contactInfo: {
     primaryEmail: "",
+    secondaryEmail: "",
     primaryMobile: "",
+    secondaryMobile: "",
     linkedin: "",
     github: "",
     portfolio: "",
@@ -433,10 +431,19 @@ export const EMPTY_RESUME = {
     sectionTitle: "Awards & Achievements",
     achievements: [],
   },
+  openSource: {
+    priority: 9,
+    sectionTitle: "Open Source",
+    contributions: {},
+  },
   languageProficiency: {
     priority: 10,
     sectionTitle: "Languages",
     languageKnows: [],
+  },
+  hobbies: {
+    priority: 11,
+    sectionTitle: "Hobbies",
   },
   templateName: "clean-ats-optimizer",
   themeColor: "light-blue",

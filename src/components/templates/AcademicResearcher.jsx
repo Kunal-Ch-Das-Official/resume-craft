@@ -1,6 +1,7 @@
 // components/templates/AcademicResearcher.jsx
 import React from "react";
-import { toArray, sortByPriority, formatDate, getTheme } from "../utils/resumeHelpers.js";
+import ResumeExtraSections from "./ResumeExtraSections";
+import { toArray, sortByPriority, formatDate, getTheme, getSectionOrder } from "../utils/resumeHelpers.js";
 
 export default function AcademicResearcher({ data, compact = false }) {
   const { basicInfo, address, contactInfo, educations, publications, workExperience } = data;
@@ -12,7 +13,7 @@ export default function AcademicResearcher({ data, compact = false }) {
   const LinkTag = compact ? "span" : "a";
 
   return (
-    <div className="max-w-4xl mx-auto p-12 bg-white text-black font-serif text-sm leading-relaxed">
+    <div className="max-w-4xl mx-auto p-12 bg-white text-black font-serif text-sm leading-relaxed flex flex-col">
       <div
         className="text-center mb-8 border-b-2 pb-4"
         style={{ borderBottomColor: theme.accent }}
@@ -26,7 +27,7 @@ export default function AcademicResearcher({ data, compact = false }) {
         </p>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6" style={{ order: getSectionOrder(data, "educations", 4) }}>
         <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-1 mb-3">
           Higher Education
         </h2>
@@ -43,7 +44,7 @@ export default function AcademicResearcher({ data, compact = false }) {
       </div>
 
       {publicationList.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6" style={{ order: getSectionOrder(data, "publications", 7) }}>
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-1 mb-3">
             Publications & Research
           </h2>
@@ -67,7 +68,7 @@ export default function AcademicResearcher({ data, compact = false }) {
       )}
 
       {companies.length > 0 && (
-        <div>
+        <div style={{ order: getSectionOrder(data, "workExperience", 2) }}>
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-1 mb-3">
             Appointments & Experience
           </h2>
@@ -84,6 +85,14 @@ export default function AcademicResearcher({ data, compact = false }) {
           ))}
         </div>
       )}
-    </div>
+    
+      <ResumeExtraSections
+        data={data}
+        exclude={["educations", "publications", "workExperience"]}
+        compact={compact}
+        theme={theme}
+        dark={false}
+      />
+</div>
   );
 }
