@@ -23,7 +23,7 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
   // Local state for the custom Key-Value dynamic pairs builder added at the bottom
   const [customKey, setCustomKey] = useState("");
   const [customValue, setCustomValue] = useState("");
-  const [customPairs, setCustomPairs] = useState([]);
+  const [customPairs, setCustomPairs] = useState(() => resume.customAttributes || []);
 
   const handleAvatarUpload = (e) => {
     const file = e.target.files?.[0];
@@ -50,14 +50,35 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
   };
 
   const handleAddPair = () => {
-    if (!customKey.trim() || !customValue.trim()) return;
-    setCustomPairs((prev) => [...prev, { id: Date.now(), key: customKey.trim(), value: customValue.trim() }]);
+    const key = customKey.trim();
+    const value = customValue.trim();
+
+    if (!key || !value) return;
+
+    const pair = {
+      id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      key,
+      value,
+    };
+
+    setCustomPairs((prev) => [...prev, pair]);
+
+    update("customAttributes", [
+      ...(resume.customAttributes || []),
+      pair,
+    ]);
+
     setCustomKey("");
     setCustomValue("");
   };
 
   const handleRemovePair = (id) => {
-    setCustomPairs((prev) => prev.filter((item) => item.id !== id));
+    const nextPairs = (resume.customAttributes || []).filter(
+      (item) => item.id !== id,
+    );
+
+    setCustomPairs(nextPairs);
+    update("customAttributes", nextPairs);
   };
 
   return (

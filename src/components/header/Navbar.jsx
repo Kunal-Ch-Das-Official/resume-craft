@@ -25,7 +25,7 @@ const LINKS = [
   },
   {
     name: "Builder",
-    href: "/build-resume",
+    href: "/resume-selector",
     icon: IconFileCv,
   },
   {
@@ -146,7 +146,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/build-resume"
+            href="/resume-selector"
             className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-all hover:bg-slate-800 hover:shadow-slate-900/30 active:scale-[0.97]"
           >
             Create Resume
@@ -209,7 +209,7 @@ export default function Navbar() {
             </Link>
 
                         <Link
-              href="/build-resume"
+              href="/resume-builder"
               onClick={() => setOpen(false)}
               className="mt-1 flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white"
             >

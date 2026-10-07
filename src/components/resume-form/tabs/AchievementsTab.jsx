@@ -180,6 +180,7 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
               onDragStart={(e) => handleDragStart(e, index)}
               onDrop={(e) => handleDrop(e, index)}
               onDragOver={(e) => e.preventDefault()}
+              className="border border-gray-200 rounded-md shadow"
             >
               <Section
                 title={`Achievement #${index + 1}: ${
@@ -265,8 +266,8 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                   rows={4}
                 />
 
-                <div className="mt-2">
-                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 pl-4">
+                <div className="mt-2 mb-6">
+                  <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-4">
                     Achievement Source Mode
                   </span>
                   <div className="mb-2 flex gap-4 text-xs font-medium text-slate-700">
@@ -303,7 +304,7 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                     />
                   ) : (
                     <div className="rounded-lg border border-dashed border-slate-300 bg-white p-2.5">
-                      <div className="mb-2 flex items-center justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2 pl-4">
                         <div className="flex items-center gap-2 overflow-hidden">
                           <IconFileText size={16} className="shrink-0 text-slate-500" />
                           <span className="truncate text-xs text-slate-600">

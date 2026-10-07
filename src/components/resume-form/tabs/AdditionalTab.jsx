@@ -322,6 +322,7 @@ export default function AdditionalTab({ resume, setResume, update }) {
               onDragStart={(e) => handleContributionDragStart(e, index)}
               onDrop={(e) => handleContributionDrop(e, index)}
               onDragOver={(e) => e.preventDefault()}
+               className="border border-gray-200 rounded-md shadow"
             >
               <Section
                 title={`Contribution #${index + 1}: ${projectName}`}
@@ -366,6 +367,7 @@ export default function AdditionalTab({ resume, setResume, update }) {
                   value={contribution.description || ""}
                   onChange={(v) => updateContribution(projectName, "description", v)}
                   placeholder="Describe your open-source contribution..."
+                  className="mb-6"
                 />
               </Section>
             </div>

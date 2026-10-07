@@ -149,14 +149,17 @@ export const TEMPLATE_DEFINITIONS = [
 
 export const DEMO_RESUME = {
   _id: "demo-resume-id",
+
   basicInfo: {
     fullName: "Aarav Mehta",
     position: "Senior Backend Engineer",
   },
+
   avatar: {
     url: "https://res.cloudinary.com/drdfur81n/image/upload/v1791209555/resume_default_avatar_xlmtdz.png?auto=format&fit=crop&w=400&h=400&q=80",
     key: "avatar-demo",
   },
+
   address: {
     streetName: "42 River Lane",
     city: "Pune",
@@ -164,6 +167,7 @@ export const DEMO_RESUME = {
     pincode: "411001",
     country: "India",
   },
+
   contactInfo: {
     primaryEmail: "aarav.mehta@example.com",
     secondaryEmail: "aarav.secondary@example.com",
@@ -173,15 +177,18 @@ export const DEMO_RESUME = {
     github: "https://github.com/aarav-mehta",
     portfolio: "https://aaravmehta.dev",
   },
+
   profileSummary: {
     priority: 1,
     subject: "Backend Engineer",
     objective:
       "Results-driven Backend Engineer with 5+ years specializing in distributed systems, event-driven architecture, and high-performance microservices. Proven record in reducing API latencies by 35% and operating multi-region Redis/Kafka clusters.",
   },
+
   workExperience: {
     priority: 2,
     sectionTitle: "Work Experience",
+
     companies: {
       "comp-1": {
         priority: 1,
@@ -193,12 +200,14 @@ export const DEMO_RESUME = {
         startDate: "2023-01",
         endDate: "",
         isPresentJob: true,
+
         responsibility: [
           "Architected real-time ingestion pipelines processing over 45M messages daily using Kafka and Go.",
           "Refactored legacy database queries, trimming P99 response times from 340ms to 48ms.",
           "Mentored an engineering squad of 6 junior devs on distributed caching and clean architecture.",
         ],
       },
+
       "comp-2": {
         priority: 2,
         jobTitle: "Software Development Engineer II",
@@ -209,6 +218,7 @@ export const DEMO_RESUME = {
         startDate: "2021-06",
         endDate: "2022-12",
         isPresentJob: false,
+
         responsibility: [
           "Engineered multi-tenant IAM microservice supporting OAuth2 and SAML Single Sign-On.",
           "Implemented comprehensive CI/CD pipelines cut automated test deployment times by 40%.",
@@ -216,9 +226,11 @@ export const DEMO_RESUME = {
       },
     },
   },
+
   projects: {
     priority: 3,
     sectionTitle: "Projects",
+
     projects: {
       "proj-1": {
         priority: 1,
@@ -229,6 +241,7 @@ export const DEMO_RESUME = {
         startDate: "2024-03",
         endDate: "2024-11",
         isWorking: false,
+
         techStack: [
           "TypeScript",
           "Node.js",
@@ -236,12 +249,14 @@ export const DEMO_RESUME = {
           "Docker",
           "OpenTelemetry",
         ],
+
         skills: [
           "Distributed Tracing",
           "Microservices",
           "Performance Profiling",
         ],
       },
+
       "proj-2": {
         priority: 2,
         name: "Cloudinary Resume Sync API",
@@ -251,14 +266,27 @@ export const DEMO_RESUME = {
         startDate: "2025-01",
         endDate: "",
         isWorking: true,
-        techStack: ["Node.js", "MongoDB", "Express", "Cloudinary SDK"],
-        skills: ["RESTful API", "Multipart File Handling", "Cloud Storage"],
+
+        techStack: [
+          "Node.js",
+          "MongoDB",
+          "Express",
+          "Cloudinary SDK",
+        ],
+
+        skills: [
+          "RESTful API",
+          "Multipart File Handling",
+          "Cloud Storage",
+        ],
       },
     },
   },
+
   educations: {
     priority: 4,
     sectionTitle: "Education",
+
     qualifications: {
       "edu-1": {
         priority: 1,
@@ -269,6 +297,7 @@ export const DEMO_RESUME = {
         percentage: "8.8 CGPA",
         description: "B.Tech in Computer Science and Engineering",
       },
+
       "edu-2": {
         priority: 2,
         institutionName: "Delhi Public School",
@@ -280,9 +309,11 @@ export const DEMO_RESUME = {
       },
     },
   },
+
   certifications: {
     priority: 5,
     sectionTitle: "Certifications",
+
     certificates: {
       "cert-1": {
         priority: 1,
@@ -291,6 +322,7 @@ export const DEMO_RESUME = {
         duration: "3 months",
         certificateUrl: "https://www.credly.com/",
       },
+
       "cert-2": {
         priority: 2,
         overview: "Certified Kubernetes Administrator (CKA)",
@@ -300,9 +332,11 @@ export const DEMO_RESUME = {
       },
     },
   },
+
   skills: {
     priority: 6,
     sectionTitle: "Skills",
+
     skills: {
       "Languages & Core": [
         "TypeScript",
@@ -311,6 +345,7 @@ export const DEMO_RESUME = {
         "SQL",
         "HTML5/CSS3",
       ],
+
       "Backend & Databases": [
         "Node.js",
         "Express",
@@ -318,6 +353,7 @@ export const DEMO_RESUME = {
         "PostgreSQL",
         "Redis",
       ],
+
       "DevOps & Cloud": [
         "Docker",
         "Kubernetes",
@@ -328,9 +364,11 @@ export const DEMO_RESUME = {
       ],
     },
   },
+
   publications: {
     priority: 7,
     sectionTitle: "Publications",
+
     publications: {
       "pub-1": {
         priority: 1,
@@ -339,6 +377,7 @@ export const DEMO_RESUME = {
         referenceUrl: "https://doi.org/10.1109/sample.2025",
         publicationReference: [],
       },
+
       "pub-2": {
         priority: 2,
         description:
@@ -348,9 +387,11 @@ export const DEMO_RESUME = {
       },
     },
   },
+
   awardsAndAchievements: {
     priority: 8,
     sectionTitle: "Awards & Achievements",
+
     achievements: [
       {
         priority: 1,
@@ -359,49 +400,86 @@ export const DEMO_RESUME = {
           "1st prize out of 500+ competing engineering institutes across India.",
         documents: [],
       },
+
       {
         priority: 2,
         title: "Northstar High Performer of the Year",
-        description: "Awarded top engineering excellence contributor in 2024.",
+        description:
+          "Awarded top engineering excellence contributor in 2024.",
         documents: [],
       },
     ],
   },
+
   openSource: {
     priority: 9,
     sectionTitle: "Open Source",
+
     contributions: {
       "Subatom Framework": {
         priority: 1,
         githubUrl: "https://github.com/example/subatom",
-        description: "Contributed runtime and developer-experience improvements to an open-source TypeScript backend framework.",
+        description:
+          "Contributed runtime and developer-experience improvements to an open-source TypeScript backend framework.",
         duration: "2025 – Present",
       },
     },
   },
+
   languageProficiency: {
     priority: 10,
     sectionTitle: "Languages",
+
     languageKnows: [
-      { languageName: "English", proficiencyOutOfTen: 9 },
-      { languageName: "Hindi", proficiencyOutOfTen: 10 },
-      { languageName: "Marathi", proficiencyOutOfTen: 8 },
+      {
+        languageName: "English",
+        proficiencyOutOfTen: 9,
+      },
+      {
+        languageName: "Hindi",
+        proficiencyOutOfTen: 10,
+      },
+      {
+        languageName: "Marathi",
+        proficiencyOutOfTen: 8,
+      },
     ],
   },
+
   hobbies: {
     priority: 11,
     sectionTitle: "Hobbies",
+
     Photography: "Street photography and visual storytelling",
     Reading: "Technology, business and systems design",
   },
+
+  // Custom metadata support
+  customAttributes: [],
+
   templateName: "clean-ats-optimizer",
   themeColor: "light-blue",
 };
 
 export const EMPTY_RESUME = {
-  basicInfo: { fullName: "", position: "" },
-  avatar: { url: "", key: "" },
-  address: { streetName: "", city: "", district: "", pincode: "", country: "" },
+  basicInfo: {
+    fullName: "",
+    position: "",
+  },
+
+  avatar: {
+    url: "",
+    key: "",
+  },
+
+  address: {
+    streetName: "",
+    city: "",
+    district: "",
+    pincode: "",
+    country: "",
+  },
+
   contactInfo: {
     primaryEmail: "",
     secondaryEmail: "",
@@ -411,40 +489,75 @@ export const EMPTY_RESUME = {
     github: "",
     portfolio: "",
   },
-  profileSummary: { priority: 1, subject: "", objective: "" },
+
+  profileSummary: {
+    priority: 1,
+    subject: "",
+    objective: "",
+  },
+
   workExperience: {
     priority: 2,
     sectionTitle: "Work Experience",
     companies: {},
   },
-  projects: { priority: 3, sectionTitle: "Projects", projects: {} },
-  educations: { priority: 4, sectionTitle: "Education", qualifications: {} },
+
+  projects: {
+    priority: 3,
+    sectionTitle: "Projects",
+    projects: {},
+  },
+
+  educations: {
+    priority: 4,
+    sectionTitle: "Education",
+    qualifications: {},
+  },
+
   certifications: {
     priority: 5,
     sectionTitle: "Certifications",
     certificates: {},
   },
-  skills: { priority: 6, sectionTitle: "Skills", skills: {} },
-  publications: { priority: 7, sectionTitle: "Publications", publications: {} },
+
+  skills: {
+    priority: 6,
+    sectionTitle: "Skills",
+    skills: {},
+  },
+
+  publications: {
+    priority: 7,
+    sectionTitle: "Publications",
+    publications: {},
+  },
+
   awardsAndAchievements: {
     priority: 8,
     sectionTitle: "Awards & Achievements",
     achievements: [],
   },
+
   openSource: {
     priority: 9,
     sectionTitle: "Open Source",
     contributions: {},
   },
+
   languageProficiency: {
     priority: 10,
     sectionTitle: "Languages",
     languageKnows: [],
   },
+
   hobbies: {
     priority: 11,
     sectionTitle: "Hobbies",
   },
+
+  // Custom metadata support
+  customAttributes: [],
+
   templateName: "clean-ats-optimizer",
   themeColor: "light-blue",
 };
@@ -452,3 +565,4 @@ export const EMPTY_RESUME = {
 export function cloneResume(data) {
   return JSON.parse(JSON.stringify(data));
 }
+

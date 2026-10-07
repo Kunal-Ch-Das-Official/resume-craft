@@ -68,24 +68,42 @@ export default function ExperienceTab({ resume, setResume, update }) {
           const currentExpCustom = expCustomInputs[id] || {
             key: "",
             value: "",
-            pairs: [],
+            pairs: item.customAttributes || [],
           };
 
           const handleAddExpPair = () => {
-            if (!currentExpCustom.key.trim() || !currentExpCustom.value.trim())
-              return;
+            const key = currentExpCustom.key.trim();
+            const value = currentExpCustom.value.trim();
+
+            if (!key || !value) return;
+
+            const pair = {
+              id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              key,
+              value,
+            };
+
+            const nextAttributes = [...(item.customAttributes || []), pair];
+
+            setResume((current) => ({
+              ...current,
+              workExperience: {
+                ...current.workExperience,
+                companies: {
+                  ...current.workExperience.companies,
+                  [id]: {
+                    ...current.workExperience.companies[id],
+                    customAttributes: nextAttributes,
+                  },
+                },
+              },
+            }));
+
             setExpCustomInputs((prev) => ({
               ...prev,
               [id]: {
                 ...currentExpCustom,
-                pairs: [
-                  ...currentExpCustom.pairs,
-                  {
-                    id: Date.now(),
-                    key: currentExpCustom.key.trim(),
-                    value: currentExpCustom.value.trim(),
-                  },
-                ],
+                pairs: [...currentExpCustom.pairs, pair],
                 key: "",
                 value: "",
               },
@@ -93,11 +111,29 @@ export default function ExperienceTab({ resume, setResume, update }) {
           };
 
           const handleRemoveExpPair = (pairId) => {
+            const nextAttributes = (item.customAttributes || []).filter(
+              (pair) => pair.id !== pairId,
+            );
+
+            setResume((current) => ({
+              ...current,
+              workExperience: {
+                ...current.workExperience,
+                companies: {
+                  ...current.workExperience.companies,
+                  [id]: {
+                    ...current.workExperience.companies[id],
+                    customAttributes: nextAttributes,
+                  },
+                },
+              },
+            }));
+
             setExpCustomInputs((prev) => ({
               ...prev,
               [id]: {
                 ...currentExpCustom,
-                pairs: currentExpCustom.pairs.filter((p) => p.id !== pairId),
+                pairs: nextAttributes,
               },
             }));
           };
@@ -109,12 +145,13 @@ export default function ExperienceTab({ resume, setResume, update }) {
               onDragStart={(e) => handleDragStart(e, index)}
               onDrop={(e) => handleDrop(e, index)}
               onDragOver={handleDragOver}
+              className="border border-gray-200 rounded-md shadow"
             >
               <Section
                 title={`Experience #${index + 1}: ${item.jobTitle || "Untitled Role"} @ ${item.companyName || "Company"}`}
                 description={item.companyName || "Configure job details"}
               >
-                <div className="flex items-center justify-between pb-2">
+                <div className="flex items-center justify-between pb-2 ">
                   <span className="flex items-center gap-1 text-[11px] text-slate-400 cursor-grab">
                     <IconGripVertical size={14} /> Drag to reorder priority (
                     {item.priority || index + 1})
@@ -255,7 +292,7 @@ export default function ExperienceTab({ resume, setResume, update }) {
                   />
                 </div>
 
-                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm">
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm mb-6">
                   <div className="mb-3">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       Custom Attributes / Metadata

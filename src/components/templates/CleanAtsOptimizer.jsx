@@ -55,7 +55,7 @@ export default function CleanAtsOptimizer({ data, compact = false }) {
           {qualifications.map((q, i) => (
             <div key={i} className="flex justify-between mb-1 text-slate-900">
               <span><strong>{q.institutionName}</strong> — {q.description}</span>
-              <span>{formatDate(q.startedAt)} – {formatDate(q.yearOfComplete)}</span>
+              <span>{formatDate(q.startedAt)}{q.pursuing ? " – Present" : q.yearOfComplete ? ` – ${formatDate(q.yearOfComplete)}` : ""}</span>
             </div>
           ))}
         </div>
@@ -71,7 +71,7 @@ export default function CleanAtsOptimizer({ data, compact = false }) {
           ))}
         </div>
       )}
-    
+
       <ResumeExtraSections
         data={data}
         exclude={["profileSummary", "workExperience", "educations", "skills"]}

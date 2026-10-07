@@ -3,7 +3,7 @@
 
 - `/` — landing page
 - `/resume-templates` — template gallery
-- `/build-resume` — interactive resume builder
+- `/resume-builder` — interactive resume builder
 - `/about` — about page
 - `/contact` — contact page
 

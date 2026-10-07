@@ -143,7 +143,7 @@ export default function ResumeTemplates() {
 
                 <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-slate-950/70 via-slate-900/0 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                   <Link
-                    href={`/build-resume?template=${t.id}`}
+                    href={`/resume-selector?template=${t.id}`}
                     className="inline-flex translate-y-2 items-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-slate-900 shadow-lg transition-transform group-hover:translate-y-0"
                   >
                     Use this template
@@ -186,7 +186,7 @@ export default function ResumeTemplates() {
                 </div>
 
                 <Link
-                  href={`/build-resume?template=${t.id}`}
+                  href={`/resume-selector?template=${t.id}`}
                   className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
                 >
                   Customize template

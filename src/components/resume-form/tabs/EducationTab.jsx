@@ -6,7 +6,7 @@ import { Field, Section } from "../controls/FormControls";
 export default function EducationTab({ resume, setResume }) {
   const qualificationsObj = resume.educations?.qualifications || {};
   const entries = Object.entries(qualificationsObj).sort(
-    ([, a], [, b]) => (a.priority || 0) - (b.priority || 0)
+    ([, a], [, b]) => (a.priority || 0) - (b.priority || 0),
   );
 
   const setMapItem = (collectionKey, id, field, value) => {
@@ -14,7 +14,8 @@ export default function EducationTab({ resume, setResume }) {
       const next = { ...current };
       if (!next.educations) next.educations = {};
       if (!next.educations[collectionKey]) next.educations[collectionKey] = {};
-      if (!next.educations[collectionKey][id]) next.educations[collectionKey][id] = {};
+      if (!next.educations[collectionKey][id])
+        next.educations[collectionKey][id] = {};
       next.educations[collectionKey][id][field] = value;
       return next;
     });
@@ -53,14 +54,24 @@ export default function EducationTab({ resume, setResume }) {
     <Section title="Education" description="Degrees and qualifications">
       <div className="grid gap-3">
         {entries.map(([id, item], index) => (
-          <div key={id} draggable onDragStart={(e) => handleDragStart(e, index)} onDrop={(e) => handleDrop(e, index)} onDragOver={handleDragOver}>
+          <div
+            key={id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragOver={handleDragOver}
+             className="border border-gray-200 rounded-md shadow"
+          >
             <Section
               title={`Education #${index + 1}: ${item.description || "Degree"} @ ${item.institutionName || "Institution"}`}
-              description={item.institutionName || "Configure education details"}
+              description={
+                item.institutionName || "Configure education details"
+              }
             >
               <div className="flex items-center justify-between pb-2">
                 <span className="flex items-center gap-1 text-[11px] text-slate-400 cursor-grab">
-                  <IconGripVertical size={14} /> Drag to reorder priority ({item.priority || index + 1})
+                  <IconGripVertical size={14} /> Drag to reorder priority (
+                  {item.priority || index + 1})
                 </span>
                 <button
                   type="button"
@@ -69,7 +80,10 @@ export default function EducationTab({ resume, setResume }) {
                     setResume((c) => {
                       const next = { ...c.educations.qualifications };
                       delete next[id];
-                      return { ...c, educations: { ...c.educations, qualifications: next } };
+                      return {
+                        ...c,
+                        educations: { ...c.educations, qualifications: next },
+                      };
                     })
                   }
                 >
@@ -81,19 +95,63 @@ export default function EducationTab({ resume, setResume }) {
                 label="Institution"
                 isRequired={true}
                 value={item.institutionName}
-                onChange={(v) => setMapItem("qualifications", id, "institutionName", v)}
+                onChange={(v) =>
+                  setMapItem("qualifications", id, "institutionName", v)
+                }
                 placeholder="Institute Name"
               />
               <div className="grid grid-cols-2 gap-2">
-                <Field isRequired={true} label="Started At" type="month" value={item.startedAt} onChange={(v) => setMapItem("qualifications", id, "startedAt", v)} />
-                <Field label="Year of Complete" type="month" value={item.yearOfComplete} onChange={(v) => setMapItem("qualifications", id, "yearOfComplete", v)} />
+                <Field
+                  isRequired={true}
+                  label="Started At"
+                  type="month"
+                  value={item.startedAt}
+                  onChange={(v) =>
+                    setMapItem("qualifications", id, "startedAt", v)
+                  }
+                />
+                {!item.pursuing && (
+                  <Field
+                    label="Year of Complete"
+                    type="month"
+                    value={item.yearOfComplete}
+                    onChange={(v) =>
+                      setMapItem("qualifications", id, "yearOfComplete", v)
+                    }
+                  />
+                )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Field isRequired={true} label="Degree / Major" value={item.description} onChange={(v) => setMapItem("qualifications", id, "description", v)} placeholder="B.Tech Computer Science" />
-                <Field label="Marks / CGPA" value={item.percentage} onChange={(v) => setMapItem("qualifications", id, "percentage", v)} placeholder="8.8 CGPA" />
+                <Field
+                  isRequired={true}
+                  label="Degree / Major"
+                  value={item.description}
+                  onChange={(v) =>
+                    setMapItem("qualifications", id, "description", v)
+                  }
+                  placeholder="B.Tech Computer Science"
+                />
+                <Field
+                  label="Marks / CGPA"
+                  value={item.percentage}
+                  onChange={(v) =>
+                    setMapItem("qualifications", id, "percentage", v)
+                  }
+                  placeholder="8.8 CGPA"
+                />
               </div>
-              <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
-                <input type="checkbox" checked={!!item.pursuing} onChange={(e) => setMapItem("qualifications", id, "pursuing", e.target.checked)} />
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 mb-6">
+                <input
+                  type="checkbox"
+                  checked={!!item.pursuing}
+                  onChange={(e) => {
+                    const pursuing = e.target.checked;
+                    setMapItem("qualifications", id, "pursuing", pursuing);
+                    if (pursuing) {
+                      setMapItem("qualifications", id, "yearOfComplete", "");
+                    }
+                  }}
+                />
                 Still Pursuing?
               </label>
             </Section>
@@ -112,7 +170,9 @@ export default function EducationTab({ resume, setResume }) {
                 qualifications: {
                   ...(c.educations?.qualifications || {}),
                   [id]: {
-                    priority: Object.keys(c.educations?.qualifications || {}).length + 1,
+                    priority:
+                      Object.keys(c.educations?.qualifications || {}).length +
+                      1,
                     institutionName: "",
                     startedAt: "",
                     yearOfComplete: "",

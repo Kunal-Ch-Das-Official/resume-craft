@@ -33,7 +33,7 @@ export default function Footer() {
           <div className="text-xs font-bold uppercase tracking-wider text-white">Product</div>
           <ul className="mt-4 space-y-2.5 text-sm text-slate-400">
             <li><Link className="hover:text-white" href="/resume-templates">Templates</Link></li>
-            <li><Link className="hover:text-white" href="/build-resume">Resume Builder</Link></li>
+            <li><Link className="hover:text-white" href="/resume-selector">Resume Builder</Link></li>
             <li><Link className="hover:text-white" href="/about">Features</Link></li>
           </ul>
         </div>

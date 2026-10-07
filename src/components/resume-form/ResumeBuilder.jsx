@@ -75,6 +75,7 @@ const ACTIVE_TAB_STORAGE_KEY = "resumecraft-active-tab";
 
 export default function ResumeBuilder({
   initialTemplate = "clean-ats-optimizer",
+  document_id = null,
 }) {
   const validInitial = useMemo(() => {
     return TEMPLATE_DEFINITIONS.some((item) => item.id === initialTemplate)
@@ -99,29 +100,93 @@ export default function ResumeBuilder({
   const { formWidth, isDragging, editorRef, startDragging, DIVIDER_HIT_WIDTH } =
     useResizablePane(650);
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem("resumecraft-draft");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const chosenTemplate =
-          initialTemplate &&
-          TEMPLATE_DEFINITIONS.some((t) => t.id === initialTemplate)
-            ? initialTemplate
-            : parsed.templateName || validInitial;
+  const [resumeData, setResumeData] = useState(null);
 
-        setResume({
-          ...stripTransientUploadReferences(parsed),
-          templateName: chosenTemplate,
-        });
-        setPendingFiles({});
-      }
-    } catch {
-      // Ignore
-    } finally {
-      setHydrated(true);
+  // Fetch resume data when document_id is present
+  useEffect(() => {
+    if (!document_id) {
+      setResumeData(null);
+      return;
     }
-  }, [initialTemplate, validInitial]);
+
+    const fetchResume = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_RESUME_FETCH_URL}/${document_id}`,
+          {
+            method: "GET",
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Response not coming.");
+        } else {
+          const data = await response.json();
+          setResumeData(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch resume:", error);
+        setResumeData(null);
+      }
+    };
+
+    fetchResume();
+  }, [document_id]);
+
+  // Conditional loading logic:
+  // If document ID is not null and resumeData is not null (and contains resume), use API resume data.
+  // Otherwise, use local static data / localStorage draft.
+  useEffect(() => {
+    if (
+      document_id != null &&
+      resumeData != null &&
+      resumeData.resume != null
+    ) {
+      const chosenTemplate =
+        initialTemplate &&
+        TEMPLATE_DEFINITIONS.some(
+          (t) => t.id === resumeData.resume.templateName,
+        )
+          ? initialTemplate
+          : resumeData.resume.templateName || validInitial;
+
+      setResume({
+        ...cloneResume(resumeData.resume),
+        templateName: chosenTemplate,
+      });
+      setPendingFiles({});
+      setHydrated(true);
+    } else if (document_id == null || resumeData == null) {
+      try {
+        const raw = window.localStorage.getItem("resumecraft-draft");
+        if (raw && !document_id) {
+          const parsed = JSON.parse(raw);
+          const chosenTemplate =
+            initialTemplate &&
+            TEMPLATE_DEFINITIONS.some((t) => t.id === initialTemplate)
+              ? initialTemplate
+              : parsed.templateName || validInitial;
+
+          setResume({
+            ...stripTransientUploadReferences(parsed),
+            templateName: chosenTemplate,
+          });
+        } else {
+          setResume({
+            ...cloneResume(DEMO_RESUME),
+            templateName: validInitial,
+          });
+        }
+      } catch {
+        setResume({
+          ...cloneResume(DEMO_RESUME),
+          templateName: validInitial,
+        });
+      } finally {
+        setHydrated(true);
+      }
+    }
+  }, [document_id, resumeData, initialTemplate, validInitial]);
 
   useEffect(() => {
     try {
@@ -132,7 +197,7 @@ export default function ResumeBuilder({
         setActiveTab(storedTab);
       }
     } catch {
-      // Ignore unavailable sessionStorage (for example, restricted browser contexts).
+      // Ignore unavailable sessionStorage.
     } finally {
       setActiveTabHydrated(true);
     }
@@ -150,12 +215,12 @@ export default function ResumeBuilder({
 
   useEffect(() => {
     setResume((current) => {
-      if (current.templateName !== validInitial) {
+      if (current.templateName !== validInitial && !resumeData?.resume) {
         return { ...current, templateName: validInitial };
       }
       return current;
     });
-  }, [validInitial]);
+  }, [validInitial, resumeData]);
 
   const update = (path, value) => {
     setResume((current) => {
@@ -175,12 +240,17 @@ export default function ResumeBuilder({
   const getSectionPriority = (name, fallbackIndex) => {
     const root = PRIORITY_TAB_CONFIG[name]?.root;
     const priority = root ? Number(resume[root]?.priority) : NaN;
-    return Number.isFinite(priority) && priority > 0 ? priority : fallbackIndex + 1;
+    return Number.isFinite(priority) && priority > 0
+      ? priority
+      : fallbackIndex + 1;
   };
 
   const orderedPriorityTabs = useMemo(() => {
-    return PRIORITY_TAB_NAMES
-      .map((name, index) => ({ name, priority: getSectionPriority(name, index), index }))
+    return PRIORITY_TAB_NAMES.map((name, index) => ({
+      name,
+      priority: getSectionPriority(name, index),
+      index,
+    }))
       .sort((a, b) => a.priority - b.priority || a.index - b.index)
       .map(({ name }) => tabs.find(([tabName]) => tabName === name));
   }, [resume]);
@@ -275,7 +345,9 @@ export default function ResumeBuilder({
               : undefined
           }
         >
-          {isReorderable && <IconGripVertical size={13} className="shrink-0 opacity-50" />}
+          {isReorderable && (
+            <IconGripVertical size={13} className="shrink-0 opacity-50" />
+          )}
           <Icon size={14} />
           {name}
         </button>
@@ -393,7 +465,11 @@ export default function ResumeBuilder({
 
               <div className="mt-3">
                 {activeTab === "Basics" && (
-                  <BasicsTab resume={resume} update={update} setPendingFiles={setPendingFiles} />
+                  <BasicsTab
+                    resume={resume}
+                    update={update}
+                    setPendingFiles={setPendingFiles}
+                  />
                 )}
                 {activeTab === "Experience" && (
                   <ExperienceTab
@@ -431,7 +507,11 @@ export default function ResumeBuilder({
                   />
                 )}
                 {activeTab === "Achievements" && (
-                  <AchievementsTab resume={resume} setResume={setResume} setPendingFiles={setPendingFiles} />
+                  <AchievementsTab
+                    resume={resume}
+                    setResume={setResume}
+                    setPendingFiles={setPendingFiles}
+                  />
                 )}
                 {activeTab === "Additional" && (
                   <AdditionalTab
@@ -477,7 +557,11 @@ export default function ResumeBuilder({
               style={{ maxHeight: "calc(100vh - 54px - 49px)" }}
             >
               {activeTab === "Basics" && (
-                <BasicsTab resume={resume} update={update} setPendingFiles={setPendingFiles} />
+                <BasicsTab
+                  resume={resume}
+                  update={update}
+                  setPendingFiles={setPendingFiles}
+                />
               )}
               {activeTab === "Experience" && (
                 <ExperienceTab
@@ -516,7 +600,11 @@ export default function ResumeBuilder({
               )}
 
               {activeTab === "Achievements" && (
-                <AchievementsTab resume={resume} setResume={setResume} setPendingFiles={setPendingFiles} />
+                <AchievementsTab
+                  resume={resume}
+                  setResume={setResume}
+                  setPendingFiles={setPendingFiles}
+                />
               )}
               {activeTab === "Additional" && (
                 <AdditionalTab

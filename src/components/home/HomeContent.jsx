@@ -69,7 +69,7 @@ const FEATURES = [
     title: "Live Preview",
     desc: "Inspect every change immediately. Switch between templates without ever losing your data or formatting.",
     color: "violet",
-    link: "/build-resume",
+    link: "/resume-builder",
     cta: "Open the editor",
   },
   {
@@ -77,7 +77,7 @@ const FEATURES = [
     title: "ATS Optimized",
     desc: "Smart structure, semantic sections, and recruiter-first typography ensure maximum compatibility and scan accuracy.",
     color: "emerald",
-    link: "/build-resume",
+    link: "/resume-builder",
     cta: "Build resume",
   },
   {
@@ -93,7 +93,7 @@ const FEATURES = [
     title: "Guided Content",
     desc: "Contextual prompts help you craft impact-focused bullet points and highlight the metrics that matter.",
     color: "amber",
-    link: "/build-resume",
+    link: "/resume-builder",
     cta: "Start writing",
   },
   {
@@ -101,7 +101,7 @@ const FEATURES = [
     title: "Instant Export",
     desc: "Pixel-perfect PDF export directly from the browser. No watermark. No credit card. Ever.",
     color: "cyan",
-    link: "/build-resume",
+    link: "/resume-builder",
     cta: "Export now",
   },
 ];
@@ -222,7 +222,7 @@ export default function HomeContent() {
                   />
                 </Link>
                 <Link
-                  href="/build-resume"
+                  href="/resume-builder"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-400 hover:bg-slate-50 active:scale-[0.98]"
                 >
                   Start from Scratch
@@ -479,7 +479,7 @@ export default function HomeContent() {
                 transition={{ duration: 0.5, delay: i * 0.08 }}
               >
                 <Link
-                  href={`/build-resume?template=${t.id}`}
+                  href={`/resume-selector?template=${t.id}`}
                   className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/60 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:bg-white hover:shadow-xl"
                 >
                   <div className="relative aspect-[3/4] w-full overflow-hidden border-b border-slate-200 bg-slate-200/50">
