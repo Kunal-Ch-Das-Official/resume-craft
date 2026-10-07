@@ -1,6 +1,7 @@
-import ResumeBuilder from "@/components/resume-form/ResumeBuilder";
+import PrintResume from "@/components/print-resume/PrintResume";
+import React from "react";
 
-export default async function BuildResume({ params, searchParams }) {
+const PrintResumePage = async ({ params, searchParams }) => {
   const routeParams = await params;
   const queryParams = await searchParams;
 
@@ -15,9 +16,10 @@ export default async function BuildResume({ params, searchParams }) {
       : "clean-ats-optimizer";
 
   return (
-    <ResumeBuilder
-      document_id={documentId}
-      initialTemplate={template}
-    />
+    <>
+      <PrintResume resumeInfoId={documentId} templates={template} />
+    </>
   );
-}
+};
+
+export default PrintResumePage;

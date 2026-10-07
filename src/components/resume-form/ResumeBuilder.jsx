@@ -44,6 +44,7 @@ import AdditionalTab from "./tabs/AdditionalTab";
 import CertificatesTab from "./tabs/CertificatesTab";
 import PublicationsTab from "./tabs/PublicationsTab";
 import AchievementsTab from "./tabs/AchievementsTab";
+import { buildResumeMultipartFormData } from "../utils/resumeUploadHelper";
 
 const tabs = [
   ["Basics", IconUserCircle],
@@ -373,7 +374,65 @@ export default function ResumeBuilder({
     setPendingFiles({});
   };
 
-  const print = () => window.print();
+  //Todo:  const print = () => window.print();
+
+  const handlePreProcessingResume = async () => {
+    try {
+      // 1. Build the multipart form data package
+      const formData = buildResumeMultipartFormData(resume, pendingFiles);
+
+      // 2. Submit the request to your Subatom backend upload endpoint
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_RESUME_DATA_UPLOAD_TO_DB_URL,
+        {
+          method: "POST",
+          body: formData,
+          // Note: Leave Content-Type header unset so the browser automatically applies the multipart boundary
+        },
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        const validationMessage = Array.isArray(result.details)
+          ? result.details
+              .map((detail) => {
+                if (typeof detail === "string") return detail;
+
+                const path = Array.isArray(detail?.path)
+                  ? detail.path.join(".")
+                  : detail?.path || "request";
+
+                return `${path}: ${detail?.message || "Validation failed"}`;
+              })
+              .join("\n")
+          : result.details
+            ? String(result.details)
+            : null;
+
+        throw new Error(
+          result.message ||
+            result.error ||
+            validationMessage ||
+            "Failed to upload resume.",
+        );
+      }
+
+      // 3. Extract the MongoDB document ID from response data
+      const document_id = result.data?._id || result.data?.id;
+
+      if (!document_id) {
+        throw new Error(
+          "Resume was created, but document ID was not returned.",
+        );
+      }
+
+      // 4. Redirect to the print page with the document ID as requested
+      window.location.href = `/print-resume/${document_id}?template=${validInitial}`;
+    } catch (error) {
+      console.error("Resume upload error:", error);
+      alert(`Error uploading resume: ${error.message}`);
+    }
+  };
 
   const currentTemplate = useMemo(
     () =>
@@ -436,20 +495,20 @@ export default function ResumeBuilder({
 
               <button
                 type="button"
-                onClick={print}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
-              >
-                <IconPrinter size={14} />
-                <span className="hidden sm:inline">Print / PDF</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={saveDraft}
-                className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 active:scale-95"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
               >
                 <IconDeviceFloppy size={14} />
                 <span>{saved ? "Saved" : "Save"}</span>
+              </button>
+
+               <button
+                type="button"
+                onClick={handlePreProcessingResume}
+                className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 active:scale-95"
+              >
+                <IconPrinter size={14} />
+                <span className="hidden sm:inline">Proceed </span>
               </button>
             </div>
           </div>
