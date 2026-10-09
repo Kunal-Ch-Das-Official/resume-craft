@@ -1,3 +1,4 @@
+// src/components/utils/BlockPrintPage.jsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,6 +9,11 @@ export default function BlockPrintPage({ children }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Safeguard against missing or undefined event / key properties
+      if (!e || typeof e.key !== "string") {
+        return;
+      }
+
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
       const key = e.key.toLowerCase();
 
@@ -26,15 +32,30 @@ export default function BlockPrintPage({ children }) {
       }
     };
 
+    const handleBeforePrint = (e) => {
+      e.preventDefault();
+      setShowModal(true);
+    };
+
     window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("beforeprint", handleBeforePrint);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("beforeprint", handleBeforePrint);
     };
   }, []);
 
   return (
     <>
+      <style jsx global>{`
+        @media print {
+          body {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       {children}
 
       {/* Custom Modal with Raw Inline CSS */}
@@ -86,7 +107,9 @@ export default function BlockPrintPage({ children }) {
               <IconX size={20} />
             </button>
 
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+            <div
+              style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}
+            >
               <div
                 style={{
                   display: "flex",
@@ -102,7 +125,9 @@ export default function BlockPrintPage({ children }) {
               >
                 <IconAlertCircle size={22} />
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+              >
                 <h3
                   style={{
                     margin: 0,
@@ -121,7 +146,9 @@ export default function BlockPrintPage({ children }) {
                     color: "#475569",
                   }}
                 >
-                  Direct printing or saving has been disabled on this page. Feel free to use the official export options provided in the workspace instead!
+                  Direct printing or saving has been disabled on this page. Feel
+                  free to use the official export options provided in the
+                  workspace instead!
                 </p>
               </div>
             </div>
@@ -148,7 +175,9 @@ export default function BlockPrintPage({ children }) {
                   boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
                   transition: "background-color 0.2s",
                 }}
-                onMouseOver={(e) => (e.target.style.backgroundColor = "#4338ca")}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = "#4338ca")
+                }
                 onMouseOut={(e) => (e.target.style.backgroundColor = "#4f46e5")}
               >
                 Got it, my bad!

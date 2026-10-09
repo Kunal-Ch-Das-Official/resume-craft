@@ -1,0 +1,449 @@
+.registrationPage {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(139, 92, 246, 0.07),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 85% 85%,
+      rgba(236, 72, 153, 0.055),
+      transparent 32%
+    ),
+    #ffffff;
+}
+
+.registrationCard {
+  width: 50vw;
+  max-width: 760px;
+  min-width: 620px;
+  padding: 26px 34px 22px;
+  background: #ffffff;
+  border: 1px solid #eeeaf5;
+  border-radius: 18px;
+  box-shadow:
+    0 18px 50px rgba(40, 24, 72, 0.07),
+    0 3px 12px rgba(40, 24, 72, 0.035);
+}
+
+/* Brand */
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: #191521;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brandMark {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  box-shadow: 0 5px 14px rgba(124, 58, 237, 0.2);
+}
+
+.brandMark svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Header */
+
+.header {
+  text-align: center;
+  margin-bottom: 17px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #18151f;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: #817b8d;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* Error */
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b42318;
+  background: #fff7f7;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.errorMessage svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+/* Form */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+/*
+  Full-width fields:
+  Full Name
+  Email
+*/
+
+.fullWidth {
+  width: 100%;
+}
+
+/*
+  Two-column rows:
+  Username + Date of Birth
+  Password + Confirm Password
+*/
+
+.twoFields {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+/* Field */
+
+.field {
+  min-width: 0;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 5px;
+  color: #383340;
+  font-size: 11.5px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+/* Input */
+
+.inputContainer {
+  position: relative;
+  width: 100%;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  color: #aaa3b4;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.inputContainer input {
+  width: 100%;
+  height: 43px;
+  padding: 0 13px 0 39px;
+  border: 1px solid #e6e1eb;
+  border-radius: 9px;
+  outline: none;
+  color: #27222d;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.inputContainer input::placeholder {
+  color: #b2acb9;
+}
+
+.inputContainer input:hover {
+  border-color: #d8d1df;
+}
+
+.inputContainer input:focus {
+  border-color: #8b5cf6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.09);
+}
+
+/* Date input */
+
+.inputContainer input[type="date"] {
+  color: #27222d;
+  padding-right: 10px;
+}
+
+.inputContainer input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+/* Password toggle */
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: #aaa3b4;
+  background: transparent;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.passwordToggle:hover {
+  color: #7c3aed;
+  background: #f6f2ff;
+}
+
+.passwordToggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.inputContainer:has(.passwordToggle) input {
+  padding-right: 42px;
+}
+
+/* Terms */
+
+.terms {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 1px;
+  color: #797282;
+  font-size: 10.5px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.terms input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkmark {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  border: 1px solid #d8d1df;
+  border-radius: 4px;
+  color: transparent;
+  background: #ffffff;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.checkmark svg {
+  width: 11px;
+  height: 11px;
+}
+
+.terms input:checked + .checkmark {
+  border-color: #7c3aed;
+  color: #ffffff;
+  background: #7c3aed;
+}
+
+.terms a {
+  color: #7040d6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.terms a:hover {
+  text-decoration: underline;
+}
+
+/* Button */
+
+.registrationButton {
+  width: 100%;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 2px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  box-shadow: 0 7px 18px rgba(124, 58, 237, 0.17);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.registrationButton svg {
+  width: 15px;
+  height: 15px;
+}
+
+.registrationButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 9px 22px rgba(124, 58, 237, 0.23);
+}
+
+.registrationButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.registrationButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Login */
+
+.loginPrompt {
+  margin-top: 13px;
+  color: #88818f;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.loginPrompt a {
+  color: #7040d6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.loginPrompt a:hover {
+  text-decoration: underline;
+}
+
+/* -----------------------------------------
+   Responsive
+----------------------------------------- */
+
+@media (max-width: 1000px) {
+  .registrationCard {
+    width: 70vw;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .registrationPage {
+    padding: 16px;
+  }
+
+  .registrationCard {
+    width: 100%;
+    max-width: 600px;
+    padding: 24px 22px 20px;
+  }
+}
+
+@media (max-width: 540px) {
+  .twoFields {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .registrationCard {
+    border-radius: 15px;
+    padding: 22px 18px 18px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 380px) {
+  .registrationPage {
+    padding: 10px;
+  }
+
+  .registrationCard {
+    padding: 20px 15px 17px;
+  }
+
+  .brand {
+    margin-bottom: 11px;
+  }
+
+  .header {
+    margin-bottom: 14px;
+  }
+}

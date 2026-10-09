@@ -10,9 +10,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body
-        data-scroll-behavior="smooth"
         suppressHydrationWarning
         className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-indigo-500 selection:text-white"
       >

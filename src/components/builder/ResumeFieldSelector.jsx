@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 
 import { useEffect, useRef, useState } from "react";
+import ResumeAnalyseLoader from "../utils/resume-analyse-loader/ResumeAnalyseLoader";
 
 export default function ResumeFieldSelector() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,14 +81,13 @@ export default function ResumeFieldSelector() {
     const validTypes = new Set([
       "application/pdf",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/msword",
     ]);
-    const validExtensions = new Set(["pdf", "docx", "doc"]);
+    const validExtensions = new Set(["pdf", "docx"]);
     const extension = file.name.split(".").pop()?.toLowerCase() || "";
     const maxFileSize = 10 * 1024 * 1024;
 
     if (!validTypes.has(file.type) && !validExtensions.has(extension)) {
-      setErrorMessage("Please upload a PDF, DOCX, or DOC file.");
+      setErrorMessage("Please upload a PDF or DOCX file.");
       return;
     }
 
@@ -157,6 +157,8 @@ export default function ResumeFieldSelector() {
         // Preserve the HTTP status as the useful error if the API did not return JSON.
       }
 
+      console.log("res", response);
+
       if (!response.ok) {
         const detail =
           typeof data?.detail === "string"
@@ -180,7 +182,9 @@ export default function ResumeFieldSelector() {
 
       window.setTimeout(() => {
         window.location.href = `/resume-builder/${data.document_id}/${
-          query ? `?template=${encodeURIComponent(query)}` : "clean-ats-optimizer"
+          query
+            ? `?template=${encodeURIComponent(query)}`
+            : "clean-ats-optimizer"
         }`;
       }, 900);
     } catch (err) {
@@ -389,27 +393,8 @@ export default function ResumeFieldSelector() {
                 aria-live="polite"
                 aria-label="Importing resume"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm">
-                  <svg
-                    className="h-7 w-7 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                    />
-                    <path
-                      className="opacity-90"
-                      fill="currentColor"
-                      d="M21 12a9 9 0 0 0-9-9v3a6 6 0 0 1 6 6h3Z"
-                    />
-                  </svg>
+                <div className="flex items-center justify-center">
+                  <ResumeAnalyseLoader />
                 </div>
 
                 <h4 className="mt-5 text-base font-bold text-slate-900">
@@ -417,7 +402,7 @@ export default function ResumeFieldSelector() {
                 </h4>
                 <p className="mt-2 max-w-xs text-xs leading-relaxed text-slate-500">
                   Uploading the document and extracting your resume information.
-                  This can take a few moments.
+                  This can take a few moments. Please don't close or reload...
                 </p>
 
                 <div className="mt-5 h-1.5 w-48 overflow-hidden rounded-full bg-emerald-100">
@@ -514,7 +499,7 @@ export default function ResumeFieldSelector() {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileSelect}
-                accept=".pdf,.docx,.doc"
+                accept=".pdf,.docx"
                 className="hidden"
               />
 

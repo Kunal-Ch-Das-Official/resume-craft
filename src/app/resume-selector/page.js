@@ -1,11 +1,11 @@
 import ResumeFieldSelector from "@/components/builder/ResumeFieldSelector";
-import React from "react";
+import React, { Suspense } from "react";
 
 const ResumeSelector = () => {
   return (
-    <main>
+    <Suspense fallback={<div>Loading selector...</div>}>
       <ResumeFieldSelector />
-    </main>
+    </Suspense>
   );
 };
 

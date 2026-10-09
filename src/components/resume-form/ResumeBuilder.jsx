@@ -22,6 +22,9 @@ import {
   IconUserCircle,
   IconWand,
   IconGripVertical,
+  IconAlertCircle,
+  IconX,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 
 import ResumeRenderer from "@/components/ResumeRenderer";
@@ -45,6 +48,8 @@ import CertificatesTab from "./tabs/CertificatesTab";
 import PublicationsTab from "./tabs/PublicationsTab";
 import AchievementsTab from "./tabs/AchievementsTab";
 import { buildResumeMultipartFormData } from "../utils/resumeUploadHelper";
+import signup from "@/helpers/signup";
+import login from "@/helpers/login";
 
 const tabs = [
   ["Basics", IconUserCircle],
@@ -59,8 +64,6 @@ const tabs = [
   ["More", IconLayoutGrid],
 ];
 
-// These tabs map directly to top-level resume sections that expose a
-// `priority` field. Their order in the editor is derived from those priorities.
 const PRIORITY_TAB_CONFIG = {
   Experience: { root: "workExperience" },
   Education: { root: "educations" },
@@ -95,15 +98,26 @@ export default function ResumeBuilder({
   const [mobileMode, setMobileMode] = useState("edit");
   const [zoom, setZoom] = useState(60);
   const [hydrated, setHydrated] = useState(false);
-  // Files are kept outside resume JSON so localStorage remains serializable.
   const [pendingFiles, setPendingFiles] = useState({});
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingRedirectUrl, setPendingRedirectUrl] = useState("");
+
+  // Professional Alert Modal State
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
+  const showAlert = (title, message) => {
+    setAlertModal({ isOpen: true, title, message });
+  };
 
   const { formWidth, isDragging, editorRef, startDragging, DIVIDER_HIT_WIDTH } =
     useResizablePane(650);
 
   const [resumeData, setResumeData] = useState(null);
 
-  // Fetch resume data when document_id is present
   useEffect(() => {
     if (!document_id) {
       setResumeData(null);
@@ -123,7 +137,17 @@ export default function ResumeBuilder({
           throw new Error("Response not coming.");
         } else {
           const data = await response.json();
-          setResumeData(data);
+          const resumeDocument = data?.resume ?? data;
+          if (
+            !resumeDocument ||
+            typeof resumeDocument !== "object" ||
+            !resumeDocument.basicInfo
+          ) {
+            throw new Error(
+              "The resume API returned an unexpected data structure.",
+            );
+          }
+          setResumeData({ ...data, resume: resumeDocument });
         }
       } catch (error) {
         console.error("Failed to fetch resume:", error);
@@ -134,22 +158,20 @@ export default function ResumeBuilder({
     fetchResume();
   }, [document_id]);
 
-  // Conditional loading logic:
-  // If document ID is not null and resumeData is not null (and contains resume), use API resume data.
-  // Otherwise, use local static data / localStorage draft.
   useEffect(() => {
     if (
       document_id != null &&
       resumeData != null &&
       resumeData.resume != null
     ) {
-      const chosenTemplate =
-        initialTemplate &&
-        TEMPLATE_DEFINITIONS.some(
-          (t) => t.id === resumeData.resume.templateName,
-        )
-          ? initialTemplate
-          : resumeData.resume.templateName || validInitial;
+      const fetchedTemplate = resumeData.resume.templateName;
+      const chosenTemplate = TEMPLATE_DEFINITIONS.some(
+        (t) => t.id === initialTemplate,
+      )
+        ? initialTemplate
+        : TEMPLATE_DEFINITIONS.some((t) => t.id === fetchedTemplate)
+          ? fetchedTemplate
+          : validInitial;
 
       setResume({
         ...cloneResume(resumeData.resume),
@@ -374,50 +396,71 @@ export default function ResumeBuilder({
     setPendingFiles({});
   };
 
-  //Todo:  const print = () => window.print();
 
+
+  //! ==================== Handle Pre Process  =======================
   const handlePreProcessingResume = async () => {
     try {
-      // 1. Build the multipart form data package
       const formData = buildResumeMultipartFormData(resume, pendingFiles);
 
-      // 2. Submit the request to your Subatom backend upload endpoint
       const response = await fetch(
         process.env.NEXT_PUBLIC_RESUME_DATA_UPLOAD_TO_DB_URL,
         {
           method: "POST",
           body: formData,
-          // Note: Leave Content-Type header unset so the browser automatically applies the multipart boundary
         },
       );
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type");
+      let result = null;
+
+      if (contentType && contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        const textError = await response.text();
+        throw new Error(
+          `Server Error (${response.status}): ${textError || response.statusText}`,
+        );
+      }
+
       if (!response.ok) {
-        const validationMessage = Array.isArray(result.details)
+        const validationMessage = Array.isArray(result?.details)
           ? result.details
               .map((detail) => {
                 if (typeof detail === "string") return detail;
-
                 const path = Array.isArray(detail?.path)
                   ? detail.path.join(".")
                   : detail?.path || "request";
-
                 return `${path}: ${detail?.message || "Validation failed"}`;
               })
               .join("\n")
-          : result.details
+          : result?.details
             ? String(result.details)
             : null;
 
         throw new Error(
-          result.message ||
-            result.error ||
+          result?.message ||
+            result?.error ||
             validationMessage ||
-            "Failed to upload resume.",
+            `Failed to upload resume (Status: ${response.status}).`,
         );
       }
 
-      // 3. Extract the MongoDB document ID from response data
+      const emailId = result.data?.contactInfo?.primaryEmail;
+      const fullName = result.data?.basicInfo?.fullName;
+
+      if (!emailId || typeof emailId !== "string" || !emailId.includes("@")) {
+        throw new Error(
+          "A valid primary email address is required in your resume contact details to proceed.",
+        );
+      }
+
+      const safeFullName =
+        typeof fullName === "string" && fullName.trim()
+          ? fullName.trim()
+          : "Candidate";
+      const today = new Date();
+
       const document_id = result.data?._id || result.data?.id;
 
       if (!document_id) {
@@ -426,11 +469,77 @@ export default function ResumeBuilder({
         );
       }
 
-      // 4. Redirect to the print page with the document ID as requested
-      window.location.href = `/print-resume/${document_id}?template=${validInitial}`;
+      const targetUrl = `/print-resume/${document_id}?template=${validInitial}`;
+
+      // ==========================================
+      // CLEAN AUTH CHECK & SESSION VALIDATION
+      // ==========================================
+      let userExists = false;
+
+      try {
+        const authRes = await fetch(process.env.NEXT_PUBLIC_LOGGEDIN_USER, {
+          method: "GET",
+          credentials: "include",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          console.log("authData", authData)
+          // If valid user data is returned, skip signup/login and proceed immediately
+          if (
+            authData &&
+            (authData.userName || authData.userEmail || authData.id)
+          ) {
+            userExists = true;
+          }
+        }
+      } catch (err) {
+        console.warn("Session check query skipped or failed:", err);
+      }
+
+      if (userExists) {
+        window.location.href = targetUrl;
+        return;
+      }
+
+      // If user is not logged in, attempt seamless automated signup
+      try {
+        const convenientSignup = await signup(emailId, safeFullName, today);
+
+        if (convenientSignup) {
+          const credentials =
+            convenientSignup.data?.credentials || convenientSignup.credentials;
+          if (credentials) {
+            await login(credentials.emailId, credentials.rawPassword);
+          }
+        }
+
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 1500);
+      } catch (signupError) {
+        const errMessage = (signupError.message || "").toLowerCase();
+        // If user already exists in database, trigger login modal
+        if (
+          errMessage.includes("already exists") ||
+          errMessage.includes("unprocessable") ||
+          errMessage.includes("duplicate")
+        ) {
+          setPendingRedirectUrl(targetUrl);
+          setShowLoginModal(true);
+        } else {
+          throw signupError;
+        }
+      }
     } catch (error) {
       console.error("Resume upload error:", error);
-      alert(`Error uploading resume: ${error.message}`);
+      showAlert(
+        "Upload Error",
+        error.message ||
+          "An unexpected error occurred while processing your resume.",
+      );
     }
   };
 
@@ -502,7 +611,7 @@ export default function ResumeBuilder({
                 <span>{saved ? "Saved" : "Save"}</span>
               </button>
 
-               <button
+              <button
                 type="button"
                 onClick={handlePreProcessingResume}
                 className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 active:scale-95"
@@ -754,7 +863,10 @@ export default function ResumeBuilder({
               style={{ height: "calc(100vh - 54px - 45px)" }}
             >
               <div
-                style={{ width: `${794 * (zoom / 100)}px`, margin: "0 auto" }}
+                style={{
+                  width: `${794 * (zoom / 100)}px`,
+                  margin: "0 auto",
+                }}
               >
                 <div
                   style={{
@@ -774,6 +886,280 @@ export default function ResumeBuilder({
       <div id="resume-print-area" className="hidden print:block">
         <ResumeRenderer resumeData={resume} />
       </div>
+
+      {/* Professional Alert Modal */}
+      {alertModal.isOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(4px)",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "400px",
+              borderRadius: "16px",
+              backgroundColor: "#ffffff",
+              padding: "24px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() =>
+                setAlertModal({ isOpen: false, title: "", message: "" })
+              }
+              style={{
+                position: "absolute",
+                right: "16px",
+                top: "16px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#94a3b8",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconX size={20} />
+            </button>
+
+            <div
+              style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  height: "40px",
+                  width: "40px",
+                  flexShrink: 0,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%",
+                  backgroundColor: "#eff6ff",
+                  color: "#3b82f6",
+                }}
+              >
+                <IconInfoCircle size={22} />
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+              >
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                  }}
+                >
+                  {alertModal.title}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "13px",
+                    lineHeight: "1.5",
+                    color: "#475569",
+                  }}
+                >
+                  {alertModal.message}
+                </p>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "24px",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setAlertModal({ isOpen: false, title: "", message: "" })
+                }
+                style={{
+                  borderRadius: "10px",
+                  backgroundColor: "#4f46e5",
+                  border: "none",
+                  color: "#ffffff",
+                  padding: "10px 20px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                }}
+              >
+                Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Existing User Modal */}
+      {showLoginModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(4px)",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "420px",
+              borderRadius: "16px",
+              backgroundColor: "#ffffff",
+              padding: "24px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setShowLoginModal(false)}
+              style={{
+                position: "absolute",
+                right: "16px",
+                top: "16px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#94a3b8",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconX size={20} />
+            </button>
+
+            <div
+              style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  height: "40px",
+                  width: "40px",
+                  flexShrink: 0,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "50%",
+                  backgroundColor: "#e0e7ff",
+                  color: "#4f46e5",
+                }}
+              >
+                <IconAlertCircle size={22} />
+              </div>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+              >
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                  }}
+                >
+                  User already exists!
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "13px",
+                    lineHeight: "1.5",
+                    color: "#475569",
+                  }}
+                >
+                  Please login first, otherwise your data will be lost when you
+                  proceed further.
+                </p>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "24px",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLoginModal(false);
+                  if (pendingRedirectUrl) {
+                    window.location.href = pendingRedirectUrl;
+                  }
+                }}
+                style={{
+                  borderRadius: "12px",
+                  backgroundColor: "#f1f5f9",
+                  border: "none",
+                  color: "#475569",
+                  padding: "10px 16px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Proceed Anyway
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLoginModal(false);
+                  window.location.href = "/sign-in";
+                }}
+                style={{
+                  borderRadius: "12px",
+                  backgroundColor: "#4f46e5",
+                  border: "none",
+                  color: "#ffffff",
+                  padding: "10px 18px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                }}
+              >
+                Log In Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!hydrated && <div className="sr-only">Hydrating draft...</div>}
     </>
