@@ -2,9 +2,10 @@ import Link from "next/link";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
-  IconBrandX,
-  IconSparkles,
+  IconBrandX
 } from "@tabler/icons-react";
+import Image from "next/image";
+import brandLogo from '../../public/resume_craft_logo.webp'
 
 export default function Footer() {
   return (
@@ -14,12 +15,31 @@ export default function Footer() {
       </div>
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:gap-6 lg:px-8">
         <div className="lg:col-span-2">
-          <Link className="inline-flex items-center gap-2.5" href="/">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white shadow-lg">
-              <IconSparkles size={18} />
+          <Link
+          href="/"
+          className="group flex items-center gap-2"
+        >
+          <span
+            className="
+          transition-transform group-hover:scale-105"
+          >
+            <Image
+              src={brandLogo}
+              alt="ResumeCraft Logo"
+              width={100}
+              height={100}
+              priority
+              className="h-8 w-8"
+            />
+          </span>
+
+          <span className="text-lg font-extrabold tracking-tight text-white">
+            Resume
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              Craft
             </span>
-            <span className="text-lg font-extrabold text-white">ResumeCraft</span>
-          </Link>
+          </span>
+        </Link>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
             Craft a premium, ATS-optimized resume in minutes. Beautiful templates, structured content, instant preview.
           </p>

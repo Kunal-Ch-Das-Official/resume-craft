@@ -27,7 +27,12 @@ export default function ConsultantStrategist({ data, compact = false }) {
           <h2 className="text-xs uppercase font-bold mb-1" style={{ color: theme.accent }}>
             Executive Briefing
           </h2>
-          <p className="text-xs text-neutral-700 leading-relaxed">{profileSummary.objective}</p>
+          <div className="text-xs text-neutral-700 leading-relaxed">
+            <div
+              className="ql-editor clean-editor"
+              dangerouslySetInnerHTML={{ __html: profileSummary.objective }}
+            />
+          </div>
         </div>
       )}
 
@@ -45,9 +50,14 @@ export default function ConsultantStrategist({ data, compact = false }) {
                 <span>{c.jobTitle} - {c.companyName} ({c.jobLocation})</span>
                 <span>{formatDate(c.startDate)} – {c.isPresentJob ? "Present" : formatDate(c.endDate)}</span>
               </div>
-              <ul className="list-disc list-inside text-xs text-neutral-700 mt-1 space-y-1">
-                {c.responsibility?.map((r, ri) => <li key={ri}>{r}</li>)}
-              </ul>
+              {c.responsibility && (
+                <div className="text-xs text-neutral-700 mt-1 space-y-1">
+                  <div
+                    className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -70,7 +80,15 @@ export default function ConsultantStrategist({ data, compact = false }) {
           </div>
         </div>
       )}
-    
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["profileSummary", "workExperience", "skills"]}
@@ -78,6 +96,6 @@ export default function ConsultantStrategist({ data, compact = false }) {
         theme={theme}
         dark={false}
       />
-</div>
+    </div>
   );
 }

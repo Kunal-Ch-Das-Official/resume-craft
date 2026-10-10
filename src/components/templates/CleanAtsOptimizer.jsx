@@ -28,7 +28,12 @@ export default function CleanAtsOptimizer({ data, compact = false }) {
       {profileSummary?.objective && (
         <div className="mb-4" style={{ order: getSectionOrder(data, "profileSummary", 1) }}>
           <h2 className="font-bold uppercase border-b border-gray-400 mb-1">Professional Summary</h2>
-          <p className="text-slate-700">{profileSummary.objective}</p>
+          <div className="text-slate-700">
+            <div
+              className="ql-editor clean-editor"
+              dangerouslySetInnerHTML={{ __html: profileSummary.objective }}
+            />
+          </div>
         </div>
       )}
 
@@ -41,9 +46,14 @@ export default function CleanAtsOptimizer({ data, compact = false }) {
                 <span>{c.jobTitle} — {c.companyName} ({c.jobLocation})</span>
                 <span>{formatDate(c.startDate)} to {c.isPresentJob ? "Present" : formatDate(c.endDate)}</span>
               </div>
-              <ul className="list-disc list-inside mt-1 space-y-0.5 text-slate-700">
-                {c.responsibility?.map((r, ri) => <li key={ri}>{r}</li>)}
-              </ul>
+              {c.responsibility && (
+                <div className="mt-1 space-y-0.5 text-slate-700">
+                  <div
+                    className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -72,6 +82,14 @@ export default function CleanAtsOptimizer({ data, compact = false }) {
         </div>
       )}
 
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["profileSummary", "workExperience", "educations", "skills"]}
@@ -79,6 +97,6 @@ export default function CleanAtsOptimizer({ data, compact = false }) {
         theme={theme}
         dark={false}
       />
-</div>
+    </div>
   );
 }

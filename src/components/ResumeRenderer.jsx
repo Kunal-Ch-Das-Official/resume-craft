@@ -10,6 +10,7 @@ import StartupInnovator from './templates/StartupInnovator';
 import ConsultantStrategist from './templates/ConsultantStrategist';
 import EntryLevelGraduate from './templates/EntryLevelGraduate';
 import InternationalEuropass from './templates/InternationalEuropass';
+import ResumeAnalyseLoader from './utils/resume-analyse-loader/ResumeAnalyseLoader';
 
 export const TEMPLATE_REGISTRY = {
   'executive-minimalist': ExecutiveMinimalist,
@@ -28,7 +29,7 @@ export default function ResumeRenderer({ resumeData, compact = false }) {
   if (!resumeData) {
     return (
       <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-500">
-        Loading resume…
+        <ResumeAnalyseLoader />
       </div>
     );
   }

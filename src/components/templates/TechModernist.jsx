@@ -146,11 +146,12 @@ export default function TechModernist({ data, compact = false }) {
                 </div>
                 <p className="text-xs text-slate-500 mb-2">{c.jobLocation}</p>
                 {c.responsibility && (
-                  <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
-                    {c.responsibility.map((r, ri) => (
-                      <li key={ri}>{r}</li>
-                    ))}
-                  </ul>
+                  <div className="text-xs text-slate-700 space-y-1">
+                    <div
+                      className="ql-editor clean-editor"
+                      dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                    />
+                  </div>
                 )}
               </div>
             ))}
@@ -193,7 +194,14 @@ export default function TechModernist({ data, compact = false }) {
                       </LinkTag>
                     )}
                   </div>
-                  <p className="text-xs text-slate-600 mb-3">{p.description}</p>
+                  {p.description && (
+                    <div className="text-xs text-slate-600 mb-3">
+                      <div
+                        className="ql-editor clean-editor"
+                        dangerouslySetInnerHTML={{ __html: p.description }}
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-1">
                   {p.techStack?.map((t, ti) => (
@@ -231,7 +239,15 @@ export default function TechModernist({ data, compact = false }) {
           ))}
         </div>
       )}
-    
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["skills", "workExperience", "projects", "educations"]}
@@ -239,6 +255,6 @@ export default function TechModernist({ data, compact = false }) {
         theme={theme}
         dark={false}
       />
-</div>
+    </div>
   );
 }

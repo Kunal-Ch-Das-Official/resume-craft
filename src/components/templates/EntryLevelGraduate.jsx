@@ -62,7 +62,14 @@ export default function EntryLevelGraduate({ data, compact = false }) {
                   </LinkTag>
                 )}
               </div>
-              <p className="text-neutral-600">{p.description}</p>
+              {p.description && (
+                <div className="text-neutral-600">
+                  <div
+                    className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: p.description }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -80,7 +87,15 @@ export default function EntryLevelGraduate({ data, compact = false }) {
           ))}
         </div>
       )}
-    
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["educations", "projects", "certifications"]}
@@ -88,6 +103,6 @@ export default function EntryLevelGraduate({ data, compact = false }) {
         theme={theme}
         dark={false}
       />
-</div>
+    </div>
   );
 }

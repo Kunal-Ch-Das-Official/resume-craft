@@ -418,7 +418,10 @@ export default function ResumeExtraSections({
                   {achievement.title || `Achievement ${index + 1}`}
                 </div>
                 {achievement.description && (
-                  <p className={text}>{achievement.description}</p>
+                  <p
+                  className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: achievement.description }}
+                  />
                 )}
                 {achievement.url && (
                   <LinkTag
@@ -466,7 +469,10 @@ export default function ResumeExtraSections({
                 )}
               </div>
               {contribution.description && (
-                <p className={text}>{contribution.description}</p>
+                <p
+                   className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: contribution.description }}
+                />
               )}
               {contribution.githubUrl && (
                 <LinkTag

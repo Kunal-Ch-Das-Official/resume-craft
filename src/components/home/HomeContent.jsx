@@ -17,6 +17,7 @@ import {
 } from "@tabler/icons-react";
 import TemplatePreview from "@/components/TemplatePreview";
 import { TEMPLATE_DEFINITIONS } from "@/lib/resume-data";
+import BrandMarquee from "../marquee/BrandMarquee";
 
 const STEPS = [
   {
@@ -366,7 +367,7 @@ export default function HomeContent() {
       </section>
 
       {/* ========== MARQUEE ========== */}
-      <section className="border-b border-slate-200 bg-white py-10">
+      {/* <section className="border-b border-slate-200 bg-white py-10">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Candidates built resumes here and got hired at top teams
@@ -390,7 +391,8 @@ export default function HomeContent() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+      <BrandMarquee />
 
       {/* ========== FEATURE GRID ========== */}
       <section className="py-20 lg:py-24 bg-slate-50/60">

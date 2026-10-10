@@ -32,8 +32,6 @@ const signup = async (emailId, fullName, dob) => {
     age: validAge,
   };
 
-  console.log("Sending signup payload:", payload); // Check your browser console to verify
-
   const response = await fetch(
     process.env.NEXT_PUBLIC_CONVENIENT_REGISTRATION_URL,
     {

@@ -1,7 +1,5 @@
-/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[2].use[1]!./node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js??ruleSet[1].rules[14].oneOf[2].use[2]!./node_modules/next/font/google/target.css?{"path":"app/layout.js","import":"Inter","arguments":[{"subsets":["latin"],"variable":"--font-inter","display":"swap"}],"variableName":"inter"} ***!
-  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-/* cyrillic-ext */
+/* @import "tailwindcss"; */
+
 @font-face {
   font-family: 'Inter';
   font-style: normal;
@@ -5148,4 +5146,20 @@ button { cursor: pointer; }
 
 .is_required{
   color: #ff0000;
+}
+
+
+/* Fix for Quill lists inside your rendered template */
+.clean-editor ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+}
+
+.clean-editor ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem !important;
+}
+
+.clean-editor li {
+  margin-bottom: 0.25rem !important;
 }

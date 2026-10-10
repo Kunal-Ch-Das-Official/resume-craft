@@ -170,9 +170,7 @@ export const DEMO_RESUME = {
 
   contactInfo: {
     primaryEmail: "aarav.mehta@example.com",
-    secondaryEmail: "aarav.secondary@example.com",
     primaryMobile: "+919876543210",
-    secondaryMobile: "+919876543211",
     linkedin: "https://linkedin.com/in/aarav-mehta",
     github: "https://github.com/aarav-mehta",
     portfolio: "https://aaravmehta.dev",
@@ -482,9 +480,7 @@ export const EMPTY_RESUME = {
 
   contactInfo: {
     primaryEmail: "",
-    secondaryEmail: "",
     primaryMobile: "",
-    secondaryMobile: "",
     linkedin: "",
     github: "",
     portfolio: "",

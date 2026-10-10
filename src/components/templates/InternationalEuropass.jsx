@@ -41,9 +41,14 @@ export default function InternationalEuropass({ data, compact = false }) {
               <div className="w-3/4">
                 <div className="font-bold text-slate-900">{c.jobTitle} - {c.companyName}</div>
                 <div className="text-slate-600">{c.jobLocation}</div>
-                <ul className="list-disc list-inside mt-1">
-                  {c.responsibility?.map((r, ri) => <li key={ri}>{r}</li>)}
-                </ul>
+                {c.responsibility && (
+                  <div className="mt-1">
+                    <div
+                      className="ql-editor clean-editor"
+                      dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -79,7 +84,15 @@ export default function InternationalEuropass({ data, compact = false }) {
           </div>
         </div>
       )}
-    
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["workExperience", "educations", "languageProficiency"]}
@@ -87,6 +100,6 @@ export default function InternationalEuropass({ data, compact = false }) {
         theme={theme}
         dark={false}
       />
-</div>
+    </div>
   );
 }

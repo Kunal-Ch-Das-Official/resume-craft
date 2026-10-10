@@ -50,6 +50,7 @@ import AchievementsTab from "./tabs/AchievementsTab";
 import { buildResumeMultipartFormData } from "../utils/resumeUploadHelper";
 import signup from "@/helpers/signup";
 import login from "@/helpers/login";
+import PageLoader from "../utils/page-loader/PageLoader";
 
 const tabs = [
   ["Basics", IconUserCircle],
@@ -101,16 +102,18 @@ export default function ResumeBuilder({
   const [pendingFiles, setPendingFiles] = useState({});
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingRedirectUrl, setPendingRedirectUrl] = useState("");
+  const [isProceeding, setIsProceeding] = useState(false);
 
   // Professional Alert Modal State
   const [alertModal, setAlertModal] = useState({
     isOpen: false,
     title: "",
     message: "",
+    details: "",
   });
 
-  const showAlert = (title, message) => {
-    setAlertModal({ isOpen: true, title, message });
+  const showAlert = (title, message, details) => {
+    setAlertModal({ isOpen: true, title, message, details });
   };
 
   const { formWidth, isDragging, editorRef, startDragging, DIVIDER_HIT_WIDTH } =
@@ -396,11 +399,10 @@ export default function ResumeBuilder({
     setPendingFiles({});
   };
 
-
-
   //! ==================== Handle Pre Process  =======================
   const handlePreProcessingResume = async () => {
     try {
+      setIsProceeding(true);
       const formData = buildResumeMultipartFormData(resume, pendingFiles);
 
       const response = await fetch(
@@ -438,12 +440,15 @@ export default function ResumeBuilder({
             ? String(result.details)
             : null;
 
-        throw new Error(
-          result?.message ||
+        throw new Error({
+          message:
+            result?.message ||
             result?.error ||
             validationMessage ||
             `Failed to upload resume (Status: ${response.status}).`,
-        );
+
+          details: result?.details,
+        });
       }
 
       const emailId = result.data?.contactInfo?.primaryEmail;
@@ -486,7 +491,6 @@ export default function ResumeBuilder({
 
         if (authRes.ok) {
           const authData = await authRes.json();
-          console.log("authData", authData)
           // If valid user data is returned, skip signup/login and proceed immediately
           if (
             authData &&
@@ -539,7 +543,11 @@ export default function ResumeBuilder({
         "Upload Error",
         error.message ||
           "An unexpected error occurred while processing your resume.",
+        error.details ||
+          "Please check the form and try again. There may be required field missing.",
       );
+    } finally {
+      setIsProceeding(false);
     }
   };
 
@@ -550,6 +558,9 @@ export default function ResumeBuilder({
     [resume.templateName],
   );
 
+  if (isProceeding) {
+    return <PageLoader />;
+  }
   return (
     <>
       <div className="no-print min-h-screen bg-slate-100/60 pb-12 lg:pb-0">
@@ -977,7 +988,9 @@ export default function ResumeBuilder({
                     color: "#475569",
                   }}
                 >
-                  {alertModal.message}
+                  <span style={{ color: "red" }}> {alertModal.message}</span>{" "}
+                  <br />
+                  <span>{alertModal.details}</span>
                 </p>
               </div>
             </div>

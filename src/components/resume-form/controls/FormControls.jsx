@@ -20,13 +20,19 @@ export function Field({
   return (
     <label className="block">
       <span className={labelClass}>
-        {Icon ? <Icon size={13} /> : null}
-        {label}{" "}
-        {isRequired === true ? (
-          <span className="is_required font-bold text-base">*</span>
-        ) : (
-          ""
-        )}
+        {/* 1. Only render Icon if it exists */}
+        {Icon && <Icon size={13} />}
+
+        {/* 2. Group the label text and the asterisk together so flex-gap doesn't separate them */}
+        <span>
+          {label}
+          {/* 3. Use standard conditional rendering (&&) instead of returning an empty span */}
+          {isRequired && (
+            <span className="is_required ml-1 text-sm font-bold text-red-500 leading-none">
+              *
+            </span>
+          )}
+        </span>
       </span>
       <input
         className={inputClass}
@@ -40,34 +46,7 @@ export function Field({
   );
 }
 
-export function AreaField({
-  label,
-  value,
-  onChange,
-  placeholder = "",
-  rows = 4,
-  isRequired = false,
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-        {label}{" "}
-        {isRequired === true ? (
-          <span className="is_required font-bold text-base">*</span>
-        ) : (
-          ""
-        )}
-      </span>
-      <textarea
-        className={`${inputClass} resize-none`}
-        rows={rows}
-        value={value ?? ""}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </label>
-  );
-}
+
 
 export function Section({
   title,
@@ -75,12 +54,14 @@ export function Section({
   required = false,
   children,
   defaultOpen = true,
-  customClass = ""
+  customClass = "",
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <section className={`border-b border-slate-100 last:border-b-0 ${customClass}`}>
+    <section
+      className={`border-b border-slate-100 last:border-b-0 ${customClass}`}
+    >
       <button
         type="button"
         className="flex w-full items-center justify-between gap-3 bg-white px-4 py-3.5 text-left transition-colors hover:bg-slate-50/60"

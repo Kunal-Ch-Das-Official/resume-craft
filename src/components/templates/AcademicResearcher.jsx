@@ -78,14 +78,27 @@ export default function AcademicResearcher({ data, compact = false }) {
                 <span>{c.jobTitle} — {c.companyName}</span>
                 <span>{formatDate(c.startDate)} – {c.isPresentJob ? "Present" : formatDate(c.endDate)}</span>
               </div>
-              {c.responsibility?.map((r, ri) => (
-                <p key={ri} className="text-xs text-gray-800 ml-4">• {r}</p>
-              ))}
+              {c.responsibility && (
+                <div className="text-xs text-gray-800 ml-4 mt-1">
+                  <div
+                    className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
-    
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["educations", "publications", "workExperience"]}
@@ -93,6 +106,6 @@ export default function AcademicResearcher({ data, compact = false }) {
         theme={theme}
         dark={false}
       />
-</div>
+    </div>
   );
 }

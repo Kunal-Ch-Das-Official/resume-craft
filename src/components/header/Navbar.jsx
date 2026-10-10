@@ -15,7 +15,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import brandLogo from "../../../public/remove_builder.png";
+import brandLogo from "../../../public/resume_craft_logo.webp";
 
 const LINKS = [
   {
@@ -73,7 +73,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          className="group flex items-center"
+          className="group flex items-center gap-2"
           onClick={() => setOpen(false)}
         >
           <span
@@ -86,7 +86,7 @@ export default function Navbar() {
               width={100}
               height={100}
               priority
-              className="h-12 w-12"
+              className="h-8 w-8"
             />
           </span>
 
@@ -195,8 +195,6 @@ export default function Navbar() {
               );
             })}
 
-
-
             <Link
               href="/account"
               onClick={() => setOpen(false)}
@@ -208,7 +206,7 @@ export default function Navbar() {
               <IconUserKey size={16} />
             </Link>
 
-                        <Link
+            <Link
               href="/resume-builder"
               onClick={() => setOpen(false)}
               className="mt-1 flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white"

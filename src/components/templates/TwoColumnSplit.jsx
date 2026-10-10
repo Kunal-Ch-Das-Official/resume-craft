@@ -68,7 +68,14 @@ export default function TwoColumnSplit({ data, compact = false }) {
         <div className="mb-6" style={{ order: getSectionOrder(data, "profileSummary", 1) }}>
           <h1 className="text-3xl font-extrabold text-slate-900">{basicInfo?.fullName}</h1>
           <p className="text-base font-semibold" style={{ color: theme.accent }}>{basicInfo?.position}</p>
-          {profileSummary?.objective && <p className="text-xs text-slate-600 mt-2">{profileSummary.objective}</p>}
+          {profileSummary?.objective && (
+            <div className="text-xs text-slate-600 mt-2">
+              <div
+                className="ql-editor clean-editor"
+                dangerouslySetInnerHTML={{ __html: profileSummary.objective }}
+              />
+            </div>
+          )}
         </div>
 
         {companies.length > 0 && (
@@ -84,9 +91,14 @@ export default function TwoColumnSplit({ data, compact = false }) {
                     {formatDate(c.startDate)} – {c.isPresentJob ? "Present" : formatDate(c.endDate)}
                   </span>
                 </div>
-                <ul className="list-disc list-inside text-xs text-slate-600 mt-1">
-                  {c.responsibility?.map((r, ri) => <li key={ri}>{r}</li>)}
-                </ul>
+                {c.responsibility && (
+                  <div className="text-xs text-slate-600 mt-1">
+                    <div
+                      className="ql-editor clean-editor"
+                      dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -105,15 +117,23 @@ export default function TwoColumnSplit({ data, compact = false }) {
             ))}
           </div>
         )}
-      
-      <ResumeExtraSections
-        data={data}
-        exclude={["profileSummary", "workExperience", "educations", "skills"]}
-        compact={compact}
-        theme={theme}
-        dark={false}
-      />
-</main>
+
+        <style dangerouslySetInnerHTML={{ __html: `
+          .clean-editor { padding: 0px !important; }
+          .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+          .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+          .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+          .clean-editor li { margin-bottom: 0.25rem !important; }
+        `}} />
+
+        <ResumeExtraSections
+          data={data}
+          exclude={["profileSummary", "workExperience", "educations", "skills"]}
+          compact={compact}
+          theme={theme}
+          dark={false}
+        />
+      </main>
     </div>
   );
 }

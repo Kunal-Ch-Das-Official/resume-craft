@@ -13,6 +13,7 @@ import {
 } from "@tabler/icons-react";
 import { Field, AreaField, Section } from "../controls/FormControls";
 import { TEMPLATE_DEFINITIONS } from "@/lib/resume-data";
+import TextEditor from "@/components/utils/form/TextEditor";
 
 export default function BasicsTab({ resume, update, setPendingFiles }) {
   const fileInputRef = useRef(null);
@@ -23,7 +24,9 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
   // Local state for the custom Key-Value dynamic pairs builder added at the bottom
   const [customKey, setCustomKey] = useState("");
   const [customValue, setCustomValue] = useState("");
-  const [customPairs, setCustomPairs] = useState(() => resume.customAttributes || []);
+  const [customPairs, setCustomPairs] = useState(
+    () => resume.customAttributes || [],
+  );
 
   const handleAvatarUpload = (e) => {
     const file = e.target.files?.[0];
@@ -63,10 +66,7 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
 
     setCustomPairs((prev) => [...prev, pair]);
 
-    update("customAttributes", [
-      ...(resume.customAttributes || []),
-      pair,
-    ]);
+    update("customAttributes", [...(resume.customAttributes || []), pair]);
 
     setCustomKey("");
     setCustomValue("");
@@ -138,7 +138,7 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 mb-8">
           <Field
             label="Full name"
             value={resume.basicInfo?.fullName}
@@ -164,13 +164,6 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
             placeholder="aarav.mehta@example.com"
             isRequired={true}
           />
-          <Field
-            label="Alternative Email"
-            type="email"
-            value={resume.contactInfo?.secondaryEmail}
-            onChange={(v) => update("contactInfo.secondaryEmail", v)}
-            placeholder="secondary@example.com"
-          />
 
           <Field
             label="Primary Mobile"
@@ -180,25 +173,22 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
             placeholder="+91 98765 43210"
             isRequired={true}
           />
-
-          <Field
-            label="Alternative Mobile"
-            icon={IconPhone}
-            value={resume.contactInfo?.secondaryMobile}
-            onChange={(v) => update("contactInfo.secondaryMobile", v)}
-            placeholder="+91 98765 43210"
-          />
         </div>
       </Section>
 
       <Section title="Profile summary" description="Summary or objective">
-        <AreaField
-          label="Professional summary"
-          value={resume.profileSummary?.objective}
-          onChange={(v) => update("profileSummary.objective", v)}
-          placeholder="Describe your technical strengths, track record and value..."
-          isRequired={true}
-        />
+        <div className="mt-2">
+          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Professional summary (Rich Text Format){" "}
+            <span className="font-bold text-base text-rose-500">*</span>
+          </label>
+          <TextEditor
+            placeholder="Describe your technical strengths, track record and value..."
+            isRequired={true}
+            value={resume.profileSummary?.objective}
+            onChange={(html) => update("profileSummary.objective", html)}
+          />
+        </div>
       </Section>
 
       <Section
@@ -240,7 +230,6 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
             placeholder="711011"
           />
 
-
           <Field
             label="Country"
             value={resume.address?.country}
@@ -273,10 +262,17 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
         />
 
         {/* //! Completed Custom Key-Value Section */}
-        <section id="key_value" className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm">
+        <section
+          id="key_value"
+          className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm"
+        >
           <div className="mb-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Custom Attributes / Metadata</h4>
-            <p className="text-[11px] text-slate-500">Add custom key-value metadata fields if needed.</p>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              Custom Attributes / Metadata
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              Add custom key-value metadata fields if needed.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -303,16 +299,24 @@ export default function BasicsTab({ resume, update, setPendingFiles }) {
             >
               <IconCheck size={14} /> Confirm
             </button>
-
           </div>
 
           {customPairs.length > 0 && (
-            <div id="preview" className="mt-4 grid gap-2 border-t border-slate-200 pt-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">Added Attributes:</span>
+            <div
+              id="preview"
+              className="mt-4 grid gap-2 border-t border-slate-200 pt-3"
+            >
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                Added Attributes:
+              </span>
               {customPairs.map((pair) => (
-                <div key={pair.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
+                <div
+                  key={pair.id}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm"
+                >
                   <div>
-                    <strong className="text-slate-800">{pair.key}:</strong> <span className="text-slate-600">{pair.value}</span>
+                    <strong className="text-slate-800">{pair.key}:</strong>{" "}
+                    <span className="text-slate-600">{pair.value}</span>
                   </div>
                   <button
                     type="button"

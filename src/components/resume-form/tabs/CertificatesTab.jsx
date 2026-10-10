@@ -13,7 +13,6 @@ import { Field, Section } from "../controls/FormControls";
 export default function CertificatesTab({
   resume,
   setResume,
-  update,
   setPendingFiles,
 }) {
   const [certSkillInputs, setCertSkillInputs] = useState({});
@@ -289,7 +288,7 @@ export default function CertificatesTab({
                   <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Skills Learned
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-4">
                     <input
                       type="text"
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"

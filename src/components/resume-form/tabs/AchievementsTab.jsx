@@ -9,8 +9,13 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { Field, AreaField, Section } from "../controls/FormControls";
+import TextEditor from "@/components/utils/form/TextEditor";
 
-export default function AchievementsTab({ resume, setResume, setPendingFiles }) {
+export default function AchievementsTab({
+  resume,
+  setResume,
+  setPendingFiles,
+}) {
   const [sourceTypes, setSourceTypes] = useState({});
 
   const achievements = Array.isArray(resume.awardsAndAchievements?.achievements)
@@ -58,7 +63,10 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
 
   const handleDrop = (e, targetIndex) => {
     e.preventDefault();
-    const sourceIndex = Number.parseInt(e.dataTransfer.getData("text/plain"), 10);
+    const sourceIndex = Number.parseInt(
+      e.dataTransfer.getData("text/plain"),
+      10,
+    );
     if (Number.isNaN(sourceIndex) || sourceIndex === targetIndex) return;
 
     const nextEntries = [...entries];
@@ -125,7 +133,9 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
       });
     }
     updateAchievement(originalIndex, {
-      documents: documents.filter((_, itemIndex) => itemIndex !== documentIndex),
+      documents: documents.filter(
+        (_, itemIndex) => itemIndex !== documentIndex,
+      ),
     });
   };
 
@@ -202,9 +212,13 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                         const currentAchievement = Array.isArray(
                           current.awardsAndAchievements?.achievements,
                         )
-                          ? current.awardsAndAchievements.achievements[originalIndex]
+                          ? current.awardsAndAchievements.achievements[
+                              originalIndex
+                            ]
                           : null;
-                        const fileIds = Array.isArray(currentAchievement?.documents)
+                        const fileIds = Array.isArray(
+                          currentAchievement?.documents,
+                        )
                           ? currentAchievement.documents
                               .map((document) => document?.fileId)
                               .filter(Boolean)
@@ -212,7 +226,9 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                         if (fileIds.length) {
                           setPendingFiles?.((currentFiles) => {
                             const nextFiles = { ...currentFiles };
-                            fileIds.forEach((fileId) => delete nextFiles[fileId]);
+                            fileIds.forEach(
+                              (fileId) => delete nextFiles[fileId],
+                            );
                             return nextFiles;
                           });
                         }
@@ -252,19 +268,24 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                 <Field
                   label="Achievement Title"
                   value={achievement.title || ""}
-                  onChange={(value) => updateAchievement(originalIndex, { title: value })}
+                  onChange={(value) =>
+                    updateAchievement(originalIndex, { title: value })
+                  }
                   placeholder="Winner of Hackathon 2026"
                 />
 
-                <AreaField
-                  label="Description"
-                  value={achievement.description || ""}
-                  onChange={(value) =>
-                    updateAchievement(originalIndex, { description: value })
-                  }
-                  placeholder="Describe the award, recognition or accomplishment"
-                  rows={4}
-                />
+                <div className="mt-2">
+                  <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    Description (Rich Text Format){" "}
+                  </label>
+                  <TextEditor
+                    placeholder="Describe the award, recognition or accomplishment..."
+                    value={achievement.description || ""}
+                    onChange={(html) =>
+                      updateAchievement(originalIndex, { description: html })
+                    }
+                  />
+                </div>
 
                 <div className="mt-2 mb-6">
                   <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-4">
@@ -277,7 +298,10 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                         name={`achievement-source-${originalIndex}`}
                         checked={currentMode === "url"}
                         onChange={() =>
-                          setSourceTypes((prev) => ({ ...prev, [originalIndex]: "url" }))
+                          setSourceTypes((prev) => ({
+                            ...prev,
+                            [originalIndex]: "url",
+                          }))
                         }
                       />
                       Provide External URL
@@ -288,7 +312,10 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                         name={`achievement-source-${originalIndex}`}
                         checked={currentMode === "upload"}
                         onChange={() =>
-                          setSourceTypes((prev) => ({ ...prev, [originalIndex]: "upload" }))
+                          setSourceTypes((prev) => ({
+                            ...prev,
+                            [originalIndex]: "upload",
+                          }))
                         }
                       />
                       Upload File (Cloudinary)
@@ -299,14 +326,19 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                     <Field
                       label="Achievement URL"
                       value={achievement.url || ""}
-                      onChange={(value) => updateAchievement(originalIndex, { url: value })}
+                      onChange={(value) =>
+                        updateAchievement(originalIndex, { url: value })
+                      }
                       placeholder="https://example.com/achievement"
                     />
                   ) : (
                     <div className="rounded-lg border border-dashed border-slate-300 bg-white p-2.5">
                       <div className="flex items-center justify-between gap-2 pl-4">
                         <div className="flex items-center gap-2 overflow-hidden">
-                          <IconFileText size={16} className="shrink-0 text-slate-500" />
+                          <IconFileText
+                            size={16}
+                            className="shrink-0 text-slate-500"
+                          />
                           <span className="truncate text-xs text-slate-600">
                             {documents.length > 0
                               ? `${documents.length} document${documents.length === 1 ? "" : "s"} attached`
@@ -314,7 +346,8 @@ export default function AchievementsTab({ resume, setResume, setPendingFiles }) 
                           </span>
                         </div>
                         <label className="cursor-pointer rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">
-                          <IconUpload size={12} className="inline mr-1" /> Choose File
+                          <IconUpload size={12} className="inline mr-1" />{" "}
+                          Choose File
                           <input
                             type="file"
                             accept=".pdf,.png,.jpg,.jpeg,.webp"

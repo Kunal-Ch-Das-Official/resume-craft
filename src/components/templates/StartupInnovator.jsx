@@ -67,7 +67,14 @@ export default function StartupInnovator({ data, compact = false }) {
                     </LinkTag>
                   )}
                 </div>
-                <p className="text-xs text-zinc-300 mb-2">{p.description}</p>
+                {p.description && (
+                  <div className="text-xs text-zinc-300 mb-2">
+                    <div
+                      className="ql-editor clean-editor"
+                      dangerouslySetInnerHTML={{ __html: p.description }}
+                    />
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-1">
                   {p.techStack?.map((t, ti) => (
                     <span key={ti} className="text-[10px] px-1.5 py-0.5 rounded border bg-zinc-950 text-zinc-200 border-zinc-700">
@@ -94,12 +101,27 @@ export default function StartupInnovator({ data, compact = false }) {
                   {formatDate(c.startDate)} – {c.isPresentJob ? "Now" : formatDate(c.endDate)}
                 </span>
               </div>
-              <p className="text-zinc-400 mt-1">{c.responsibility?.join(" ")}</p>
+              {c.responsibility && (
+                <div className="text-zinc-400 mt-1">
+                  <div
+                    className="ql-editor clean-editor"
+                    dangerouslySetInnerHTML={{ __html: c.responsibility }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
-    
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-editor { padding: 0px !important; }
+        .clean-editor strong, .clean-editor b { font-weight: 700 !important; color: inherit !important; }
+        .clean-editor ul { list-style-type: disc !important; padding-left: 1.25rem !important; }
+        .clean-editor ol { list-style-type: decimal !important; padding-left: 1.25rem !important; }
+        .clean-editor li { margin-bottom: 0.25rem !important; }
+      `}} />
+
       <ResumeExtraSections
         data={data}
         exclude={["projects", "workExperience"]}
@@ -107,6 +129,6 @@ export default function StartupInnovator({ data, compact = false }) {
         theme={theme}
         dark={true}
       />
-</div>
+    </div>
   );
 }

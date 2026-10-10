@@ -157,8 +157,6 @@ export default function ResumeFieldSelector() {
         // Preserve the HTTP status as the useful error if the API did not return JSON.
       }
 
-      console.log("res", response);
-
       if (!response.ok) {
         const detail =
           typeof data?.detail === "string"

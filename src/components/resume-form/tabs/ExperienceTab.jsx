@@ -228,7 +228,9 @@ export default function ExperienceTab({ resume, setResume, update }) {
                       Job Type
                     </span>
                     <select
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5
+                       text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400
+                       focus:ring-2 focus:ring-indigo-100"
                       value={item.jobTypes || "FULL_TIME"}
                       onChange={(e) =>
                         setMapItem("companies", id, "jobTypes", e.target.value)

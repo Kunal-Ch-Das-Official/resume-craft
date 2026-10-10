@@ -10,6 +10,7 @@ export default function TextEditor({
   className = "",
   readOnly = false,
   isRequired = false,
+  maxLength = null, // Added maxLength prop
   label,
   error: externalError = "",
 }) {
@@ -18,6 +19,7 @@ export default function TextEditor({
   const onChangeRef = useRef(onChange);
 
   const [error, setError] = useState("");
+  const [charCount, setCharCount] = useState(0);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -78,19 +80,10 @@ export default function TextEditor({
           toolbar: readOnly
             ? false
             : [
-                // Text sizing
                 [{ header: [1, 2, 3, false] }],
-
-                // Basic text formatting
                 ["bold", "italic", "underline", "strike"],
-
-                // Text and background colors
                 [{ color: [] }, { background: [] }],
-
-                // Alignment
                 [{ align: [] }],
-
-                // Lists
                 [{ list: "ordered" }, { list: "bullet" }],
               ],
         },
@@ -112,11 +105,27 @@ export default function TextEditor({
 
       if (value) {
         quill.clipboard.dangerouslyPasteHTML(value);
+        setCharCount(quill.getLength() - 1);
       }
 
-      const handleTextChange = () => {
+      // Updated handleTextChange to accept 'source' and handle length limits
+      const handleTextChange = (delta, oldDelta, source) => {
+        // Prevent infinite loops triggered by state updates
+        if (source === "api") return;
+
+        // Enforce Text Limit
+        if (maxLength) {
+          const currentLength = quill.getLength() - 1; // -1 to ignore Quill's trailing newline
+          if (currentLength > maxLength) {
+            quill.deleteText(maxLength, currentLength - maxLength);
+          }
+        }
+
         const html = quill.root.innerHTML;
         const text = getTextValue(quill);
+
+        // Update char count state for UI
+        setCharCount(quill.getLength() - 1);
 
         const normalizedValue =
           html === "<p><br></p>" || html === "<p></p>"
@@ -181,6 +190,7 @@ export default function TextEditor({
       const selection = quill.getSelection();
 
       quill.clipboard.dangerouslyPasteHTML(value || "");
+      setCharCount(quill.getLength() - 1);
 
       if (selection) {
         try {
@@ -196,11 +206,10 @@ export default function TextEditor({
 
   return (
     <div className="w-full">
-      {/* Label */}
+      {/* Label & Required Indicator */}
       {label && (
         <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
           {label}
-
           {isRequired && (
             <span className="ml-1 text-red-500" aria-hidden="true">
               *
@@ -230,12 +239,22 @@ export default function TextEditor({
         <div ref={editorRef} />
       </div>
 
-      {/* Error */}
-      {displayError && (
-        <p className="mt-1.5 text-sm text-red-500" role="alert">
-          {displayError}
-        </p>
-      )}
+      {/* Footer: Error & Character Count */}
+      <div className="mt-1.5 flex items-start justify-between text-sm">
+        <div className="flex-1">
+          {displayError && (
+            <p className="text-red-500" role="alert">
+              {displayError}
+            </p>
+          )}
+        </div>
+
+        {maxLength && (
+          <div className={`ml-4 shrink-0 ${charCount >= maxLength ? "text-red-500" : "text-gray-500 dark:text-gray-400"}`}>
+            {charCount} / {maxLength}
+          </div>
+        )}
+      </div>
 
       <style jsx global>{`
         .resume-text-editor {
@@ -258,8 +277,51 @@ export default function TextEditor({
 
         .resume-text-editor .ql-editor {
           min-height: 180px;
-          padding: 14px 16px;
+          padding: 16px;
           line-height: 1.6;
+        }
+
+        /*
+          FIX 1: Tailwind CSS "Preflight" strips font-weights and list styles.
+          These rules force Quill styles to display correctly.
+        */
+        .resume-text-editor .ql-editor strong,
+        .resume-text-editor .ql-editor b {
+          font-weight: 700 !important;
+        }
+
+        .resume-text-editor .ql-editor em,
+        .resume-text-editor .ql-editor i {
+          font-style: italic !important;
+        }
+
+        .resume-text-editor .ql-editor h1 {
+          font-size: 2em !important;
+          font-weight: 700 !important;
+        }
+
+        .resume-text-editor .ql-editor h2 {
+          font-size: 1.5em !important;
+          font-weight: 700 !important;
+        }
+
+        .resume-text-editor .ql-editor h3 {
+          font-size: 1.17em !important;
+          font-weight: 700 !important;
+        }
+
+        .resume-text-editor .ql-editor ul {
+          list-style-type: disc !important;
+          padding-left: 1rem !important;
+        }
+
+        .resume-text-editor .ql-editor ol {
+          list-style-type: decimal !important;
+          padding-left: 1rem !important;
+        }
+
+        .resume-text-editor .ql-editor li {
+          margin-bottom: 0.25rem;
         }
 
         .resume-text-editor .ql-editor.ql-blank::before {
@@ -330,6 +392,7 @@ export default function TextEditor({
           color: #6b7280;
         }
 
+        /* FIX 2: Fixed padding issues on mobile */
         @media (max-width: 640px) {
           .resume-text-editor .ql-toolbar {
             padding: 6px;
@@ -337,7 +400,7 @@ export default function TextEditor({
 
           .resume-text-editor .ql-editor {
             min-height: 150px;
-            padding: 12px;
+            padding: 12px; /* Restored standard padding instead of 0px */
           }
 
           .resume-text-editor .ql-container {
